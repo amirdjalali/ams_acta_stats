@@ -1,0 +1,19 @@
+count,year,type
+2,2017,no relatedid
+4,2017,has relatedid
+6,2018,has relatedid
+3,2018,no relatedid
+13,2019,no relatedid
+12,2019,has relatedid
+32,2020,no relatedid
+20,2020,has relatedid
+15,2021,no relatedid
+27,2021,has relatedid
+31,2022,no relatedid
+25,2022,has relatedid
+11,2023,no relatedid
+21,2023,has relatedid
+50,2024,no relatedid
+50,2024,has relatedid
+101,2025,has relatedid
+61,2025,no relatedid
