@@ -67,21 +67,25 @@ def export_by_year(df, date_list=None):
 def plot_pie_chart(df, param, min=0, date_list=None):
     df = df.loc[df["_id.year"].isin(date_list)]
     df = df.rename(columns={"_id.subject": "subject"})
-    print(df)
     df["macro_sector"] = df.apply(lambda row: row.subject.split("-")[0], axis=1)
-    counts = df["macro_sector"].value_counts()
-    print(counts)
-    counts.index = [label if count >= min else "Other" for label, count in counts.items()]
-    fig = px.pie(
-        values=counts.values,
-        names=counts.index,
-        title=f"Subjects Distribution, {date_list}"
-    )
-    fig2 = px.sunburst(df, path=["macro_sector", "subject"], title=f"Subjects Distribution, {date_list}")
+    print(df)
+    counts_macro_sectors = df["macro_sector"].value_counts().to_frame('count').reset_index().rename(columns={'index': 'Value'})
+    counts_subjects = df["subject"].value_counts().to_frame('count').reset_index().rename(columns={'index': 'Value'})
+    macro_sectors_dict = dict(zip(counts_macro_sectors["macro_sector"], counts_macro_sectors["count"]))
+    subjects_dict = dict(zip(counts_subjects["subject"], counts_subjects["count"]))
+    print(subjects_dict)
+    df_clean = df.copy()
+    # remove macro_sector if count < min
+    df_clean["macro_sector"] = [label if macro_sectors_dict[label] > min else "other" for label in df["macro_sector"]]
+    # remove also subject if macro sector is other
+    df_clean.loc[df_clean["macro_sector"] == "other", "subject"] = "other"
+    print(df)
+    # remove subject is subject count is lesser than min
+    df_clean["subject"] = [label if subjects_dict.get(label, 0) > min else "other" for label in df_clean["subject"]]
+    print(df_clean)
+    fig2 = px.sunburst(df_clean, path=["macro_sector", "subject"], values="count", title=f"Subjects Distribution, {date_list}")
     fig2.show()  # opens in browser
-    return counts.groupby(counts.index).sum()
-
-
+    return df_clean
 
 if __name__ == "__main__":
     collection = connect_to_db("mongodb://localhost:27017/",  "admin", "amsacta_documenti")
