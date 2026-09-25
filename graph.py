@@ -7,7 +7,6 @@ from plotly.subplots import make_subplots
 import plotly.io as pio
 
 
-
 def connect_to_db(client_url, db_name, collection_name):
 
     client = MongoClient()  # or your Atlas connection string
@@ -273,7 +272,8 @@ def plot_subject_chart(df, param, threshold=0, start_year=None, end_year=None):
     df_clean["subject"] = [label if subjects_dict.get(label, 0) > threshold else "other" for label in df_clean["subject"]]
     fig2 = px.sunburst(df_clean, path=["macro_sector", "subject"], values="count", title=f"Subjects Distribution, {start_year}, {end_year}")
     #fig2.show()  # opens in browser
-    df_clean.to_csv(f"{param}_{start_year}_{end_year}.csv", index=False, encoding="utf-8")
+    df_clean.to_csv(f"{param}_{start_year}-{end_year}.csv", index=False, encoding="utf-8")
+    fig2.write_image(f"{param}_{start_year}-{end_year}.png")
     return fig2
 
 def plot_size_historgram(df, min_year=None, max_year=None):
@@ -292,7 +292,7 @@ def plot_size_historgram(df, min_year=None, max_year=None):
         tickvals=[.001, .01, .1, 1, 10, 100, 1000, 10000]
     )
     df_filtered.to_csv("sizes.csv", index=False, encoding="utf-8")
-    #fig.show()
+    fig.write_image("sizes.png")
     return fig
 
 def plot_histogram(df, min_year=0, max_year=9999, type_filter=None, filename="documents"):
@@ -308,6 +308,7 @@ def plot_histogram(df, min_year=0, max_year=9999, type_filter=None, filename="do
         barmode="stack"
         )
     df_filtered.to_csv(f"{filename}_{min_year}-{max_year}" + (f"_{type_filter}" if type_filter else "") + ".csv", index=False, encoding="utf-8")
+    fig.write_image(f"{filename}_{min_year}-{max_year}" + (f"_{type_filter}" if type_filter else "") + ".png")
     return fig
 
 
@@ -324,7 +325,7 @@ def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1):
         title=f"Funding information ({param}), {min_year}, {max_year}"
     )
     df_grouped.to_csv(f"{param}_{min_year}-{max_year}.csv", index=False, encoding="utf-8")
-    #fig.show()
+    fig.write_image(f"{param}_{min_year}-{max_year}.png")
     return fig
 
 def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=None):
@@ -347,7 +348,7 @@ def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=Non
         title=f"Structures, {min_year}, {max_year}"
     )
     df_grouped.to_csv(f"{param}_{min_year}-{max_year}.csv", index=False, encoding="utf-8")
-    #fig.show()
+    fig.write_image(f"{param}_{min_year}-{max_year}.png")
     return fig
 
 def plot_creators(df, min_year="", max_year="", top_n=100):
@@ -365,7 +366,7 @@ def plot_creators(df, min_year="", max_year="", top_n=100):
     )
 
     df_grouped.to_csv(f"top_{top_n}_creators_{min_year}-{max_year}.csv", index=False, encoding="utf-8")
-    #fig.show()
+    fig.write_image(f"top_{top_n}_creators_{min_year}-{max_year}.png")
     return fig
 
 if __name__ == "__main__":
@@ -385,7 +386,7 @@ if __name__ == "__main__":
     related["type"] = related["type"].map({True: "has relatedid", False: "no relatedid"})
     related_plot = plot_histogram(related, min_year=2017, max_year=2025, filename="relatedid")
     
-    with open("dashboard.html", "w") as f:
+    with open("dashboard.html", "w") as f, open("report.md", "w") as r:
         f.write("""
                 <html>
                 <head>
@@ -412,29 +413,38 @@ if __name__ == "__main__":
                 <body>
                 """)
 
+        r.write("# Report AMS Acta\n")
+
         f.write("<h1>Documenti per tipologia</h1>")
+        r.write("\n## Documenti per tipologia\n")
         f.write(types_plot.to_html(full_html=False, include_plotlyjs="cdn"))
+        r.write("\n![Documenti per tipologia](documents_2017-2025.png)\n\nScarica il file CSV: [documents_2017-2025.csv](documents_2017-2025.csv)\n")
         f.write(datasets_plot.to_html(full_html=False, include_plotlyjs=False))
+        r.write("\n![Documenti per tipologia](documents_2017-2025_dataset.png)\n\nScarica il file CSV: [documents_2017-2025_dataset.csv](documents_2017-2025_dataset.csv)\n")
         f.write("<h1>Dataset con collegamento a pubblicazione</h1>")
+        r.write("\n## Dataset con collegamento a pubblicazione\n")
         f.write(related_plot.to_html(full_html=False, include_plotlyjs=False))
+        r.write("\n![Dataset con collegamento a pubblicazione](relatedid_2017-2025.png)\n\nScarica il file CSV: [relatedid_2017-2025.csv](relatedid_2017-2025.csv)\n")
         f.write("<h1>Volume di dati</h1>")
+        r.write("\n## Volume di dati\n")
         f.write(gbs.to_html(full_html=False, include_plotlyjs=False))
-
-
+        r.write("\n![Volume di dati](sizes.png)\n\nScarica il file CSV: [sizes.csv](sizes.csv)\n")
 
         f.write("<h1>Settori disciplinari</h1>")
+        r.write("\n## Settori disciplinari\n")
         for start_year in start_years:
             end_year = start_year + 2
             subjects = get_subjects_or_structures(collection)
             threshold = 5 if start_year > 2019 else 1
             subjects_plot = plot_subject_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
             f.write(subjects_plot.to_html(full_html=False, include_plotlyjs=False))
+            r.write(f"\n![Settori disciplinari](subject_{start_year}-{end_year}.png)\n\nScarica il file CSV: [subject_{start_year}-{end_year}.csv](subject_{start_year}-{end_year}.csv)\n")
 
         f.write("<h1>Strutture</h1>")
+        r.write("\n## Strutture\n")
         for start_year in start_years:
             end_year = start_year + 2
             structures = get_subjects_or_structures(collection, type="structures")
-            print("Structures are: ", structures)
             structures_plot = plot_structures(df=structures, 
                                               param="structure", 
                                               threshold=0, 
@@ -442,54 +452,35 @@ if __name__ == "__main__":
                                               max_year=end_year,
                                               df_map=subjects_and_structures)
             f.write(structures_plot.to_html(full_html=False, include_plotlyjs=False))
+            r.write(f"\n![Strutture](structure_{start_year}-{end_year}.png)\n\nScarica il file CSV: [structure_{start_year}-{end_year}.csv](structure_{start_year}-{end_year}.csv)\n")
 
         f.write("<h1>Progetti</h1>")
+        r.write("\n## Progetti\n")
         for start_year in start_years:
+            param = "projectacronym"
             end_year = start_year + 2
-            projects = get_funding_info(collection, "projectacronym", start_year, end_year)
-            projects_plot = plot_funding_treemap(projects, "projectacronym", start_year, end_year)
+            projects = get_funding_info(collection, param, start_year, end_year)
+            projects_plot = plot_funding_treemap(projects, param, start_year, end_year)
             f.write(projects_plot.to_html(full_html=False, include_plotlyjs=False))
+            r.write(f"\n![Progetti]({param}_{start_year}-{end_year}.png)\n\nScarica il file CSV: [{param}_{start_year}-{end_year}.csv]({param}_{start_year}-{end_year}.csv)\n")
 
         f.write("<h1>Enti finanziatori</h1>")
+        r.write("\n## Enti finanziatori\n")
         for start_year in start_years:
             end_year = start_year + 2
             funders = get_funding_info(collection, "funder", start_year, end_year)
             funders_plot = plot_funding_treemap(funders, "funder", start_year, end_year)
             f.write(funders_plot.to_html(full_html=False, include_plotlyjs=False))
+            r.write(f"\n![Enti finanziatori](funder_{start_year}-{end_year}.png)\n\nScarica il file CSV: [funder_{start_year}-{end_year}.csv](funder_{start_year}-{end_year}.csv)\n")
 
         f.write("<h1>Creatori</h1>")
+        r.write("\n## Creatori\n")
         for start_year in start_years:
+            top_n = 50
             end_year = start_year + 2
             creators = get_creators(collection, start_year, end_year)
-            creators_plot = plot_creators(creators, start_year, end_year, 50)
+            creators_plot = plot_creators(creators, start_year, end_year, top_n=top_n)
             f.write(creators_plot.to_html(full_html=False, include_plotlyjs=False))
+            r.write(f"\n![Creatori](top_{top_n}_creators_{start_year}-{end_year}.png)\n\nScarica il file CSV: [top_{top_n}_creators_{start_year}-{end_year}.csv](top_{top_n}_creators_{start_year}-{end_year}.csv)\n")
 
-        
         f.write("</body></html>")
-
-
-# counts = df["subjects"].value_counts()
-# counts.index = [label if count >= 3 else "Other" for label, count in counts.items()]
-# counts = counts.groupby(counts.index).sum()
-
-# print(counts)
-
-# fig, ax = plt.subplots(figsize=(12, 8))
-
-# wedges, texts = ax.pie(
-#     counts.values,
-#     labels=counts.index,
-#     #autopct="%1.1f%%",
-#     startangle=140,
-#     pctdistance=1.2,
-#     labeldistance=1.2,
-# )
-
-# # for text in texts:
-# #     x, y = text.get_position()
-# #     text.set_position((x - 0.1, y))  # change 0.1 to more or less offset
-
-# ax.set_title("Subjects Distribution")
-# plt.tight_layout()
-# plt.show()
-
