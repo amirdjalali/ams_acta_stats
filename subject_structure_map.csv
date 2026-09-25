@@ -1,0 +1,857 @@
+subjectid;name
+BIO-02;BIO/02 Botanica sistematica
+BIO-03;BIO/03 Botanica ambientale e applicata
+BIO-04;BIO/04 Fisiologia vegetale
+BIO-05;BIO/05 Zoologia
+BIO-06;BIO/06 Anatomia comparata e citologia
+BIO-07;BIO/07 Ecologia
+BIO-08;BIO/08 Antropologia
+BIO-09;BIO/09 Fisiologia
+BIO-10;BIO/10 Biochimica
+BIO-11;BIO/11 Biologia molecolare
+BIO-12;BIO/12 Biochimica clinica e biologia molecolare e clinica
+BIO-13;BIO/13 Biologia applicata
+BIO-14;BIO/14 Farmacologia
+BIO-15;BIO/15 Biologia farmaceutica
+BIO-16;BIO/16 Anatomia umana
+BIO-17;BIO/17 Istologia
+BIO-18;BIO/18 Genetica
+BIO-19;BIO/19 Microbiologia
+CHIM;Area 03 - Scienze chimiche
+CHIM-01;CHIM/01 Chimica analitica
+CHIM-02;CHIM/02 Chimica fisica
+CHIM-03;CHIM/03 Chimica generale e inorganica
+CHIM-04;CHIM/04 Chimica industriale
+CHIM-05;CHIM/05 Scienza e tecnologia dei materiali polimerici
+CHIM-06;CHIM/06 Chimica organica
+CHIM-07;CHIM/07 Fondamenti chimici delle tecnologie
+CHIM-08;CHIM/08 Chimica farmaceutica
+CHIM-09;CHIM/09 Farmaceutico tecnologico applicativo
+CHIM-10;CHIM/10 Chimica degli alimenti
+CHIM-11;CHIM/11 Chimica e biotecnologia delle fermentazioni
+CHIM-12;CHIM/12 Chimica dell'ambiente e dei beni culturali
+FIS;Area 02 - Scienze fisiche
+FIS-01;FIS/01 Fisica sperimentale
+FIS-02;FIS/02 Fisica teorica, modelli e metodi matematici
+FIS-03;FIS/03 Fisica della materia
+FIS-04;FIS/04 Fisica nucleare e subnucleare
+FIS-05;FIS/05 Astronomia e astrofisica
+FIS-06;FIS/06 Fisica per il sistema terra e il mezzo circumterrestre
+FIS-07;FIS/07 Fisica applicata (a beni culturali, ambientali, biologia e medicina)
+FIS-08;FIS/08 Didattica e storia della fisica
+GEO;Area 04 - Scienze della terra
+GEO-01;GEO/01 Paleontologia e paleoecologia
+GEO-02;GEO/02 Geologia stratigrafica e sedimentologica
+GEO-03;GEO/03 Geologia strutturale
+GEO-04;GEO/04 Geografia fisica e geomorfologia
+GEO-05;GEO/05 Geologia applicata
+GEO-06;GEO/06 Mineralogia
+GEO-07;GEO/07 Petrologia e petrografia
+GEO-08;GEO/08 Geochimica e vulcanologia
+GEO-09;GEO/09 Georisorse minerarie e applicazioni mineralogico- petrografiche per l'ambiente ed i beni culturali
+GEO-10;GEO/10 Geofisica della terra solida
+GEO-11;GEO/11 Geofisica applicata
+GEO-12;GEO/12 Oceanografia e fisica dell'atmosfera
+ICAR;Area 08 - Ingegneria civile e Architettura
+ICAR-01;ICAR/01 Idraulica
+ICAR-02;ICAR/02 Costruzioni idrauliche e marittime e idrologia
+ICAR-03;ICAR/03 Ingegneria sanitaria-ambientale
+ICAR-04;ICAR/04 Strade, ferrovie ed aeroporti
+ICAR-05;ICAR/05 Trasporti
+ICAR-06;ICAR/06 Topografia e cartografia
+ICAR-07;ICAR/07 Geotecnica
+ICAR-08;ICAR/08 Scienza delle costruzioni
+ICAR-09;ICAR/09 Tecnica delle costruzioni
+ICAR-10;ICAR/10 Architettura tecnica
+ICAR-11;ICAR/11 Produzione edilizia
+ICAR-12;ICAR/12 Tecnologia dell'architettura
+ICAR-13;ICAR/13 Disegno industriale
+ICAR-14;ICAR/14 Composizione architettonica e urbana
+ICAR-15;ICAR/15 Architettura del paesaggio
+ICAR-16;ICAR/16 Architettura degli interni e allestimento
+ICAR-17;ICAR/17 Disegno
+ICAR-18;ICAR/18 Storia dell'architettura
+ICAR-19;ICAR/19 Restauro
+ICAR-20;ICAR/20 Tecnica e pianificazione urbanistica
+ICAR-21;ICAR/21 Urbanistica
+ICAR-22;ICAR/22 Estimo
+INF-01;INF/01 Informatica
+ING-IND;Area 09 - Ingegneria industriale e dell'informazione
+ING-IND-01;ING-IND/01 Architettura navale
+ING-IND-02;ING-IND/02 Costruzioni e impianti navali e marini
+ING-IND-03;ING-IND/03 Meccanica del volo
+ING-IND-04;ING-IND/04 Costruzioni e strutture aerospaziali
+ING-IND-05;ING-IND/05 Impianti e sistemi aerospaziali
+ING-IND-06;ING-IND/06 Fluidodinamica
+ING-IND-07;ING-IND/07 Propulsione aerospaziale
+ING-IND-08;ING-IND/08 Macchine a fluido
+ING-IND-09;ING-IND/09 Sistemi per l'energia e l'ambiente
+ING-IND-10;ING-IND/10 Fisica tecnica industriale
+ING-IND-11;ING-IND/11 Fisica tecnica ambientale
+ING-IND-12;ING-IND/12 Misure meccaniche e termiche
+ING-IND-13;ING-IND/13 Meccanica applicata alle macchine
+ING-IND-14;ING-IND/14 Progettazione meccanica e costruzione di macchine
+ING-IND-15;ING-IND/15 Disegno e metodi dell'ingegneria industriale
+ING-IND-16;ING-IND/16 Tecnologie e sistemi di lavorazione
+ING-IND-17;ING-IND/17 Impianti industriali meccanici
+ING-IND-18;ING-IND/18 Fisica dei reattori nucleari
+ING-IND-19;ING-IND/19 Impianti nucleari
+ING-IND-20;ING-IND/20 Misure e strumentazione nucleari
+ING-IND-21;ING-IND/21 Metallurgia
+ING-IND-22;ING-IND/22 Scienza e tecnologia dei materiali
+ING-IND-23;ING-IND/23 Chimica fisica applicata
+ING-IND-24;ING-IND/24 Principi di ingegneria chimica
+ING-IND-25;ING-IND/25 Impianti chimici
+ING-IND-26;ING-IND/26 Teoria dello sviluppo dei processi chimici
+ING-IND-27;ING-IND/27 Chimica industriale e tecnologica
+ING-IND-28;ING-IND/28 Ingegneria e sicurezza degli scavi
+ING-IND-29;ING-IND/29 Ingegneria delle materie prime
+ING-IND-30;ING-IND/30 Idrocarburi e fluidi del sottosuolo
+ING-IND-31;ING-IND/31 Elettrotecnica
+ING-IND-32;ING-IND/32 Convertitori, macchine e azionamenti elettrici
+ING-IND-33;ING-IND/33 Sistemi elettrici per l'energia
+ING-IND-34;ING-IND/34 Bioingegneria industriale
+ING-IND-35;ING-IND/35 Ingegneria economico-gestionale
+ING-INF-01;ING-INF/01 Elettronica
+ING-INF-02;ING-INF/02 Campi elettromagnetici
+ING-INF-03;ING-INF/03 Telecomunicazioni
+ING-INF-04;ING-INF/04 Automatica
+ING-INF-05;ING-INF/05 Sistemi di elaborazione delle informazioni
+ING-INF-06;ING-INF/06 Bioingegneria elettronica e informatica
+ING-INF-07;ING-INF/07 Misure elettriche e elettroniche
+IUS;Area 12 - Scienze giuridiche
+IUS-01;IUS/01 Diritto privato
+IUS-02;IUS/02 Diritto privato comparato
+IUS-03;IUS/03 Diritto agrario
+IUS-04;IUS/04 Diritto commerciale
+IUS-05;IUS/05 Diritto dell'economia
+IUS-06;IUS/06 Diritto della navigazione
+IUS-07;IUS/07 Diritto del lavoro
+IUS-08;IUS/08 Diritto costituzionale
+IUS-09;IUS/09 Istituzioni di diritto pubblico
+IUS-10;IUS/10 Diritto amministrativo
+IUS-11;IUS/11 Diritto ecclesiastico e canonico
+IUS-12;IUS/12 Diritto tributario
+IUS-13;IUS/13 Diritto internazionale
+IUS-14;IUS/14 Diritto dell'Unione Europea
+IUS-15;IUS/15 Diritto processuale civile
+IUS-16;IUS/16 Diritto processuale penale
+IUS-17;IUS/17 Diritto penale
+IUS-18;IUS/18 Diritto romano e diritti dell'antichità
+IUS-19;IUS/19 Storia del diritto medievale e moderno
+IUS-20;IUS/20 Filosofia del diritto
+IUS-21;IUS/21 Diritto pubblico comparato
+L-ANT;Area 10 - Scienze dell'antichità, filologico-letterarie e storico-artistiche
+L-ANT-01;L-ANT/01 Preistoria e protostoria
+L-ANT-02;L-ANT/02 Storia greca
+L-ANT-03;L-ANT/03 Storia romana
+L-ANT-04;L-ANT/04 Numismatica
+L-ANT-05;L-ANT/05 Papirologia
+L-ANT-06;L-ANT/06 Etruscologia e antichità italiche
+L-ANT-07;L-ANT/07 Archeologia classica
+L-ANT-08;L-ANT/08 Archeologia cristiana e medievale
+L-ANT-09;L-ANT/09 Topografia antica
+L-ANT-10;L-ANT/10 Metodologie della ricerca archeologica
+L-ART-01;L-ART/01 Storia dell'arte medievale
+L-ART-02;L-ART/02 Storia dell'arte moderna
+L-ART-03;L-ART/03 Storia dell'arte contemporanea
+L-ART-04;L-ART/04 Museologia e critica artistica e del restauro
+L-ART-05;L-ART/05 Discipline dello spettacolo
+L-ART-06;L-ART/06 Cinema, fotografia e televisione
+L-ART-07;L-ART/07 Musicologia e storia della musica
+L-ART-08;L-ART/08 Etnomusicologia
+L-FIL-LET-01;L-FIL-LET/01 Civiltà egee
+L-FIL-LET-02;L-FIL-LET/02 Lingua e letteratura greca
+L-FIL-LET-03;L-FIL-LET/03 Filologia italica, illirica, celtica
+L-FIL-LET-04;L-FIL-LET/04 Lingua e letteratura latina
+L-FIL-LET-05;L-FIL-LET/05 Filologia classica
+L-FIL-LET-06;L-FIL-LET/06 Letteratura cristiana antica
+L-FIL-LET-07;L-FIL-LET/07 Civiltà bizantina
+L-FIL-LET-08;L-FIL-LET/08 Letteratura latina medievale e umanistica
+L-FIL-LET-09;L-FIL-LET/09 Filologia e linguistica romanza
+L-FIL-LET-10;L-FIL-LET/10 Letteratura italiana
+L-FIL-LET-11;L-FIL-LET/11 Letteratura italiana contemporanea
+L-FIL-LET-12;L-FIL-LET/12 Linguistica italiana
+L-FIL-LET-13;L-FIL-LET/13 Filologia della letteratura italiana
+L-FIL-LET-14;L-FIL-LET/14 Critica letteraria e letterature comparate
+L-FIL-LET-15;L-FIL-LET/15 Filologia germanica
+L-LIN-01;L-LIN/01 Glottologia e linguistica
+L-LIN-02;L-LIN/02 Didattica delle lingue moderne
+L-LIN-03;L-LIN/03 Letteratura francese
+L-LIN-04;L-LIN/04 Lingua e traduzione - Lingua francese
+L-LIN-05;L-LIN/05 Letteratura spagnola
+L-LIN-06;L-LIN/06 Lingua e letterature ispano-americane
+L-LIN-07;L-LIN/07 Lingua e traduzione - Lingua spagnola
+L-LIN-08;L-LIN/08 Letteratura portoghese e brasiliana
+L-LIN-09;L-LIN/09 Lingua e traduzione - Lingue portoghese e brasiliana
+L-LIN-10;L-LIN/10 Letteratura inglese
+L-LIN-11;L-LIN/11 Lingue e letterature anglo-americane
+L-LIN-12;L-LIN/12 Lingua e traduzione - Lingua inglese
+L-LIN-13;L-LIN/13 Letteratura tedesca
+L-LIN-14;L-LIN/14 Lingua e traduzione - Lingua tedesca
+L-LIN-15;L-LIN/15 Lingue e letterature nordiche
+L-LIN-16;L-LIN/16 Lingua e letteratura nederlandese
+L-LIN-17;L-LIN/17 Lingua e letteratura romena
+L-LIN-18;L-LIN/18 Lingua e letteratura albanese
+L-LIN-19;L-LIN/19 Filologia ugro-finnica
+L-LIN-20;L-LIN/20 Lingua e letteratura neogreca
+L-LIN-21;L-LIN/21 Slavistica
+L-OR-01;L-OR/01 Storia del vicino oriente antico
+L-OR-02;L-OR/02 Egittologia e civiltà copta
+L-OR-03;L-OR/03 Assiriologia
+L-OR-04;L-OR/04 Anatolistica
+L-OR-05;L-OR/05 Archeologia e storia dell'arte del vicino oriente antico
+L-OR-06;L-OR/06 Archeologia fenicio-punica
+L-OR-07;L-OR/07 Semitistica - lingue e letterature dell'Etiopia
+L-OR-08;L-OR/08 Ebraico
+L-OR-09;L-OR/09 Lingue e letterature dell'Africa
+L-OR-10;L-OR/10 Storia dei paesi islamici
+L-OR-11;L-OR/11 Archeologia e storia dell'arte musulmana
+L-OR-12;L-OR/12 Lingua e letteratura araba
+L-OR-13;L-OR/13 Armenistica, caucasologia, mongolistica e turcologia
+L-OR-14;L-OR/14 Filologia, religioni e storia dell'Iran
+L-OR-15;L-OR/15 Lingua e letteratura persiana
+L-OR-16;L-OR/16 Archeologia e storia dell'arte dell'India e dell'Asia centrale
+L-OR-17;L-OR/17 Filosofie, religioni e storia dell'India e dell'Asia centrale
+L-OR-18;L-OR/18 Indologia e tibetologia
+L-OR-19;L-OR/19 Lingue e letterature moderne del subcontinente indiano
+L-OR-20;L-OR/20 Archeologia, storia dell'arte e filosofie dell'Asia orientale
+L-OR-21;L-OR/21 Lingue e letterature della Cina e dell'Asia sud-orientale
+L-OR-22;L-OR/22 Lingue e letterature del Giappone e della Corea
+L-OR-23;L-OR/23 Storia dell'Asia orientale e sud-orientale
+M-DEA-01;M-DEA/01 Discipline demoetnoantropologiche
+M-EDF-01;M-EDF/01 Metodi e didattiche delle attività motorie
+M-EDF-02;M-EDF/02 Metodi e didattiche delle attività sportive
+M-FIL-01;M-FIL/01 Filosofia teoretica
+M-FIL-02;M-FIL/02 Logica e filosofia della scienza
+M-FIL-03;M-FIL/03 Filosofia morale
+M-FIL-04;M-FIL/04 Estetica
+M-FIL-05;M-FIL/05 Filosofia e teoria dei linguaggi
+M-FIL-06;M-FIL/06 Storia della filosofia
+M-FIL-07;M-FIL/07 Storia della filosofia antica
+M-FIL-08;M-FIL/08 Storia della filosofia medievale
+M-GGR-01;M-GGR/01 Geografia
+M-GGR-02;M-GGR/02 Geografia economico-politica
+M-PED-01;M-PED/01 Pedagogia generale e sociale
+M-PED-02;M-PED/02 Storia della pedagogia
+M-PED-03;M-PED/03 Didattica e pedagogia speciale
+M-PED-04;M-PED/04 Pedagogia sperimentale
+M-PSI-01;M-PSI/01 Psicologia generale
+M-PSI-02;M-PSI/02 Psicobiologia e psicologia fisiologica
+000150.001;Medical Imaging Group
+180;Dipartimento di Protezione e Valorizzazione Agro Alimentare - DIPROVAL
+200;Dipartimento delle Arti Visive
+210;Dipartimento di Elettronica, Informatica, Sistemistica - DEIS
+220;Dipartimento di Lingue e Letterature Straniere Moderne
+000220.001;Centro di Studi Linguistico-Culturali: Ricerca-Prassi-Formazione
+235;Dipartimento di Scienze Aziendali
+380;Dipartimento di Discipline Giuridiche dell'Economia e dell'Azienda
+390;Dipartimento di Ingegneria delle Costruzioni Meccaniche, Nucleari, Aeronautiche e di Metallurgia - DIEM
+421;Dipartimento di Ingegneria Chimica, Mineraria e delle Tecnologie Ambientali - DICMA
+432;Dipartimento di Discipline della Comunicazione
+458;Dipartimento di Archeologia
+470;Dipartimento di Ingegneria Elettrica - DIE
+474;Dipartimento di Ingegneria delle Strutture, dei trasporti, delle acque, del rilevamento, del territorio - DISTART
+476;Dipartimento di Studi Linguistici e Orientali - DSLO
+478;Dipartimento di Storie e Metodi per la Conservazione dei Beni Culturali
+494;Dipartimento di Scienze Giuridiche
+532;"Centro Interdipartimentale di Ricerca in Storia del Diritto, Filosofia e Sociologia del Diritto e Informatica Giuridica ""Augusto Gaudenzi e Guido Fassò"" - CIRSFID"
+551;"Centro Interfacoltà di Linguistica Teorica e Applicata ""L. Heilmann"" - CILTA"
+71100;Centro Linguistico dei Poli Scientifico-Didattici della Romagna - CLIRO
+1468;Dipartimento di Architettura e Pianificazione Territoriale - DAPT
+310;Dipartimento di Storia Antica
+375;Dipartimento di Ingegneria Civile, Ambientale e dei Materiali - DICAM
+490;Dipartimento di Studi Interdisciplinari su Traduzione, Lingue e Culture
+50;Dipartimento di Filologia Classica e Medioevale
+59;Centro Inter-Bibliotecario - CIB
+75500;Sistema Bibliotecario d'Ateneo - SBA
+81706;Polo Scientifico - Didattico di Rimini - Biblioteca Centralizzata
+82139;Centro E-Learning d'Ateneo - CELAB
+90;Dipartimento di Politica, Istituzioni, Storia
+951;Dipartimento di Architettura - DA
+952;Dipartimento Delle Arti - DAR
+953;"Dipartimento di Chimica ""Giacomo Ciamician"" - CHIM"
+954;Dipartimento di Farmacia e Biotecnologie - FaBiT
+955;Dipartimento di Filologia classica e Italianistica - FICLIT
+956;Dipartimento di Filosofia e Comunicazione - FILCOM
+957;Dipartimento di Fisica e Astronomia - DIFA
+958;Dipartimento di Informatica - Scienza e Ingegneria - DISI
+959;Dipartimento di Ingegneria civile, chimica, ambientale e dei Materiali - DICAM
+960;"Dipartimento di Ingegneria dell' Energia elettrica e dell'Informazione ""Guglielmo Marconi"" - DEI"
+961;Dipartimento di Ingegneria industriale - DIN
+962;Dipartimento di Lingue, Letterature e Culture moderne - LILEC
+963;Dipartimento di Matematica - MAT
+964;Dipartimento di Medicina specialistica, diagnostica e sperimentale - DIMES
+965;Dipartimento di Psicologia - PSI
+966;Dipartimento di Scienze agrarie - DipSA
+967;Dipartimento di Scienze aziendali - DiSA
+968;Dipartimento di Scienze biologiche, geologiche e ambientali - BiGeA
+969;Dipartimento di Scienze biomediche e neuromotorie - DIBINEM
+970;"Dipartimento di Scienze dell’Educazione ""Giovanni Maria Bertin"" - EDU"
+971;Dipartimento di Scienze e Tecnologie agro-alimentari - DISTAL
+972;"Dipartimento di Chimica industriale ""Toso Montanari"" - CHIMIND"
+973;Dipartimento di Scienze economiche - DSE
+974;Dipartimento di Scienze giuridiche - DSG
+975;Dipartimento di Scienze mediche e chirurgiche - DIMEC
+976;Dipartimento di Scienze mediche veterinarie - DIMEVET
+977;Dipartimento di Scienze per la Qualità della Vita - QUVI
+978;Dipartimento di Scienze politiche e sociali - SPS
+979;"Dipartimento di Scienze statistiche ""Paolo Fortunati"" - STAT"
+980;Dipartimento di Sociologia e Diritto dell’Economia - SDE
+981;Dipartimento di Storia Culture Civiltà - DiSCi
+982;Dipartimento dei Beni culturali - DBC
+983;Dipartimento di Interpretazione e Traduzione - DIT
+AGR;Area 07 - Scienze agrarie e veterinarie
+AGR-01;AGR/01 Economia ed estimo rurale
+AGR-02;AGR/02 Agronomia e coltivazioni erbacee
+AGR-03;AGR/03 Arboricoltura generale e coltivazioni arboree
+AGR-04;AGR/04 Orticoltura e floricoltura
+AGR-05;AGR/05 Assestamento forestale e selvicoltura
+AGR-06;AGR/06 Tecnologia del legno e utilizzazioni forestali
+AGR-07;AGR/07 Genetica agraria
+AGR-08;AGR/08 Idraulica agraria e sistemazioni idraulico-forestali
+AGR-09;AGR/09 Meccanica agraria
+AGR-10;AGR/10 Costruzioni rurali e territorio agroforestale
+AGR-11;AGR/11 Entomologia generale e applicata
+AGR-12;AGR/12 Patologia vegetale
+AGR-13;AGR/13 Chimica agraria
+AGR-14;AGR/14 Pedologia
+AGR-15;AGR/15 Scienze e tecnologie alimentari
+AGR-16;AGR/16 Microbiologia agraria
+AGR-17;AGR/17 Zootecnica generale e miglioramento genetico
+AGR-18;AGR/18 Nutrizione e alimentazione animale
+AGR-19;AGR/19 Zootecnica speciale
+AGR-20;AGR/20 Zoocolture
+ARCES;"Centro di Ricerca Avanzato sui Sistemi Elettronici per l'Ingegneria dell'Informazione e delle Telecomunicazioni ""Ercole De Castro"" (ARCES)"
+BIO;Area 05 - Scienze biologiche
+BIO-01;BIO/01 Botanica generale
+60;Dipartimento di Paleografia e Medievistica
+80;Dipartimento di Discipline Storiche
+100;Dipartimento di Musica e Spettacolo - MUSPE
+120;Dipartimento di Scienze Economiche
+150;Dipartimento di Fisica
+20;Dipartimento di Scienze Statistiche
+10;Dipartimento di Matematica
+M-PSI-03;M-PSI/03 Psicometria
+M-PSI-04;M-PSI/04 Psicologia dello sviluppo e psicologia dell'educazione
+M-PSI-05;M-PSI/05 Psicologia sociale
+M-PSI-06;M-PSI/06 Psicologia del lavoro e delle organizzazioni
+M-PSI-07;M-PSI/07 Psicologia dinamica
+M-PSI-08;M-PSI/08 Psicologia clinica
+M-STO;Area 11 - Scienze storiche, filosofiche, pedagogiche e psicologiche
+M-STO-01;M-STO/01 Storia medievale
+M-STO-02;M-STO/02 Storia moderna
+M-STO-03;M-STO/03 Storia dell'Europa orientale
+M-STO-04;M-STO/04 Storia contemporanea
+M-STO-05;M-STO/05 Storia della scienza e delle tecniche
+M-STO-06;M-STO/06 Storia delle religioni
+M-STO-07;M-STO/07 Storia del Cristianesimo e delle Chiese
+M-STO-08;M-STO/08 Archivistica, bibliografia e biblioteconomia
+M-STO-09;M-STO/09 Paleografia
+MAT;Area 01 - Scienze matematiche e informatiche
+MAT-01;MAT/01 Logica matematica
+MAT-02;MAT/02 Algebra
+MAT-03;MAT/03 Geometria
+MAT-04;MAT/04 Matematiche complementari
+MAT-05;MAT/05 Analisi matematica
+MAT-06;MAT/06 Probabilità e statistica matematica
+MAT-07;MAT/07 Fisica matematica
+MAT-08;MAT/08 Analisi numerica
+MAT-09;MAT/09 Ricerca operativa
+MC;Dipartimento di Medicina Clinica
+MED;Area 06 - Scienze mediche
+MED-01;MED/01 Statistica medica
+MED-02;MED/02 Storia della medicina
+MED-03;MED/03 Genetica medica
+MED-04;MED/04 Patologia generale
+MED-05;MED/05 Patologia clinica
+MED-06;MED/06 Oncologia medica
+MED-07;MED/07 Microbiologia e microbiologia clinica
+MED-08;MED/08 Anatomia patologica
+MED-09;MED/09 Medicina interna
+MED-10;MED/10 Malattie dell'apparato respiratorio
+MED-11;MED/11 Malattie dell'apparato cardiovascolare
+MED-12;MED/12 Gastroenterologia
+MED-13;MED/13 Endocrinologia
+MED-14;MED/14 Nefrologia
+MED-15;MED/15 Malattie del sangue
+MED-16;MED/16 Reumatologia
+MED-17;MED/17 Malattie infettive
+MED-18;MED/18 Chirurgia generale
+MED-19;MED/19 Chirurgia plastica
+MED-20;MED/20 Chirurgia pediatrica e infantile
+MED-21;MED/21 Chirurgia toracica
+MED-22;MED/22 Chirurgia vascolare
+MED-23;MED/23 Chirurgia cardiaca
+MED-24;MED/24 Urologia
+MED-25;MED/25 Pschiatria
+MED-26;MED/26 Neurologia
+MED-27;MED/27 Neurochirurgia
+MED-28;MED/28 Malattie odontostomatologiche
+MED-29;MED/29 Chirurgia maxillofacciale
+MED-30;MED/30 Malattie apparato visivo
+MED-31;MED/31 Otorinolaringoiatria
+MED-32;MED/32 Audiologia
+MED-33;MED/33 Malattie apparato locomotore
+MED-34;MED/34 Medicina fisica e riabilitativa
+MED-35;MED/35 Malattie cutanee e veneree
+MED-36;MED/36 Diagnostica per immagini e radioterapia
+MED-37;MED/37 Neuroradiologia
+MED-38;MED/38 Pediatria generale e specialistica
+MED-39;MED/39 Neuropsichiatria infantile
+MED-40;MED/40 Ginecologia e ostetricia
+MED-41;MED/41 Anestesiologia
+MED-42;MED/42 Igiene generale e applicata
+MED-43;MED/43 Medicina legale
+MED-44;MED/44 Medicina del lavoro
+MED-45;MED/45 Scienze infermieristiche generali, cliniche e pediatriche
+MED-46;MED/46 Scienze tecniche di medicina di laboratorio
+MED-47;MED/47 Scienze infermieristiche ostetrico-ginecologiche
+MED-48;MED/48 Scienze infermieristiche e tecniche neuro-psichiatriche e riabilitative
+MED-49;MED/49 Scienze tecniche dietetiche applicate
+MED-50;MED/50 Scienze tecniche mediche applicate
+MT;Dipartimento di Matematica per le Scienze Economiche e Sociali — MATEMATES
+SECS;Area 13 - Scienze economiche e statistiche
+SECS-P-01;SECS-P/01 Economia politica
+SECS-P-02;SECS-P/02 Politica economica
+SECS-P-03;SECS-P/03 Scienza delle finanze
+SECS-P-04;SECS-P/04 Storia del pensiero economico
+SECS-P-05;SECS-P/05 Econometria
+SECS-P-06;SECS-P/06 Economia applicata
+SECS-P-07;SECS-P/07 Economia aziendale
+SECS-P-08;SECS-P/08 Economia e gestione delle imprese
+SECS-P-09;SECS-P/09 Finanza aziendale
+SECS-P-10;SECS-P/10 Organizzazione aziendale
+SECS-P-11;SECS-P/11 Economia degli intermediari finanziari
+SECS-P-12;SECS-P/12 Storia economica
+SECS-P-13;SECS-P/13 Scienze merceologiche
+SECS-S-01;SECS-S/01 Statistica
+SECS-S-02;SECS-S/02 Statistica per la ricerca sperimentale e tecnologica
+SECS-S-03;SECS-S/03 Statistica economica
+SECS-S-04;SECS-S/04 Demografia
+SECS-S-05;SECS-S/05 Statistica sociale
+SECS-S-06;SECS-S/06 Metodi matematici dell'economia e delle scienze attuariali e finanziarie
+SPS;Area 14 - Scienze politiche e sociali
+SPS-01;SPS/01 Filosofia politica
+SPS-02;SPS/02 Storia delle dottrine politiche
+SPS-03;SPS/03 Storia delle istituzioni politiche
+SPS-04;SPS/04 Scienza politica
+SPS-05;SPS/05 Storia e istituzioni delle Americhe
+SPS-06;SPS/06 Storia delle relazioni internazionali
+SPS-07;SPS/07 Sociologia generale
+SPS-08;SPS/08 Sociologia dei processi culturali e comunicativi
+SPS-09;SPS/09 Sociologia dei processi economici e del lavoro
+SPS-10;SPS/10 Sociologia dell'ambiente e del territorio
+SPS-11;SPS/11 Sociologia dei fenomeni politici
+SPS-12;SPS/12 Sociologia giuridica, della devianza e mutamento sociale
+SPS-13;SPS/13 Storia e istituzioni dell'Africa
+SPS-14;SPS/14 Storia e istituzioni dell'Asia
+SSLMIT;Scuola Superiore di Lingue Moderne per Interpreti e Traduttori
+TAO;TAO Research Programs
+VET-01;VET/01 Anatomia degli animali domestici
+VET-02;VET/02 Fisiologia veterinaria
+VET-03;VET/03 Patologia generale e anatomia patologica veterinaria
+VET-04;VET/04 Ispezione degli alimenti di origine animale
+VET-05;VET/05 Malattie infettive degli animali domestici
+VET-06;VET/06 Parassitologia e malattie parassitarie degli animali
+VET-07;VET/07 Farmacologia e tossicologia veterinaria
+VET-08;VET/08 Clinica medica veterinaria
+VET-09;VET/09 Clinica chirurgica veterinaria
+VET-10;VET/10 Clinica ostetrica e ginecologia veterinaria
+2012;Biblioteca interdipartimentale di chimica
+cirsil;Centro Interuniversitario di Ricerca sulla Storia degli Insegnamenti Linguistici - CIRSIL
+departments;Dipartimenti (fino al 16/10/2012)
+departments2013;Dipartimenti
+gaas;GAAS
+sis;Società Italiana di Statistica
+sistemi;Sistemi
+socsci;Società Scientifiche
+subjects;Settori scientifico-disciplinari
+structures;Strutture
+ASDD;Area Sistemi Dipartimentali e Documentali - ASDD
+CRIFSP;Centro di Ricerca e Formazione sul Settore Pubblico - C.RI.F.S.P.
+SH1;SH1 - Individuals, Institutions and Markets: Economics, finance and management
+SH1_1;SH1_1 Macroeconomics
+SH1_2;SH1_2 Development, economic growth
+SH1_3;SH1_3 Microeconomics, behavioural economics
+SH1_4;SH1_4 Marketing
+SH1_5;SH1_5 Political economy, institutional economics, law and economics
+SH1_6;SH1_6 Econometrics, statistical methods
+SH1_7;SH1_7 Financial markets, asset prices, international finance
+SH1_8;SH1_8 Banking, corporate finance, accounting
+SH1_9;SH1_9 Competitiveness, innovation, research and development
+SH1_10;SH1_10 Organization studies: theory & strategy, industrial organization
+SH1_11;SH1_11 Labour economics, income distribution and poverty
+SH1_12;SH1_12 Public economics
+SH1_13;SH1_13 International trade
+SH1_14;SH1_14 History of economic thought and quantitative economic history
+SH2;SH2 - Institutions, Values, Beliefs and Behaviour: Sociology, social anthropology, political science, law, communication, social studies of science and technology
+SH2_1;SH2_1 Social structure, inequalities, social mobility, interethnic relations
+SH2_2;SH2_2 Social policies, work and welfare
+SH2_3;SH2_3 Kinship, cultural dimensions of classification and cognition, identity, gender
+SH2_4;SH2_4 Myth, ritual, symbolic representations, religious studies
+SH2_5;SH2_5 Democratization, social movements
+SH2_6;SH2_6 Violence, conflict and conflict resolution
+SH2_7;SH2_7 Political systems and institutions, governance
+SH2_8;SH2_8 Legal studies, constitutions, comparative law, human rights
+SH2_9;SH2_9 Global and transnational governance, international studies
+SH2_10;SH2_10 Communication networks, media, information society
+SH2_11;SH2_11 Social studies of science and technology
+SH3;SH3 - Environment, Space and Population: Environmental studies, geography, demography, migration, regional and urban studies
+SH3_1;SH3_1 Environment, resources and sustainability
+SH3_2;SH3_2 Environmental change and society
+SH3_3;SH3_3 Environmental regulations and climate negotiations
+SH3_4;SH3_4 Social and industrial ecology
+SH3_5;SH3_5 Population dynamics, aging, health and society
+SH3_6;SH3_6 Households, family and fertility
+SH3_7;SH3_7 Migration
+SH3_8;SH3_8 Mobility, tourism, transportation and logistics
+SH3_9;SH3_9 Spatial development and architecture, land use, regional planning
+SH3_10;SH3_10 Urban studies, regional studies
+SH3_11;SH3_11 Social geography, infrastructure,
+SH3_12;SH3_12 Geo-information and spatial data analysis
+SH4;SH4 - The Human Mind and Its Complexity: Cognitive science, psychology, linguistics, education
+SH4_1;SH4_1 Evolution of mind and cognitive functions, animal communication
+SH4_2;SH4_2 Human life-span development
+SH4_3;SH4_3 Neuropsychology
+SH4_4;SH4_4 Cognitive and experimental psychology: perception, action, and higher cognitive processes
+SH4_5;SH4_5 Social and clinical psychology
+SH4_6;SH4_6 Linguistics: formal, cognitive, functional and computational linguistics
+SH4_7;SH4_7 Linguistics: typological, historical and comparative linguistics
+SH4_8;SH4_8 Psycholinguistics and neurolinguistics: acquisition and knowledge of language, language pathologies
+SH4_9;SH4_9 Use of language: pragmatics, sociolinguistics, discourse analysis, second language teaching and learning, lexicography, terminology
+SH4_10;SH4_10 Philosophy of mind, epistemology and logic
+SH4_11;SH4_11 Education: systems and institutions, teaching and learning Environmental studies, geography, demography, migration, regional and urban studies
+SH5;SH5 - Cultures and Cultural Production: Literature and philosophy, visual and performing arts, music, cultural and comparative studies
+SH5_1;SH5_1 Classics, ancient Greek and Latin literature and art
+SH5_2;SH5_2 History of literature
+SH5_3;SH5_3 Literary theory and comparative literature, literary styles
+SH5_4;SH5_4 Textual philology, palaeography and epigraphy
+SH5_5;SH5_5 Visual arts, performing arts, design
+SH5_6;SH5_6 Philosophy, history of philosophy
+SH5_7;SH5_7 Museums and exhibitions
+SH5_8;SH5_8 Music and musicology, history of music
+SH5_9;SH5_9 History of art and architecture
+SH5_10;SH5_10 Cultural studies, cultural diversity
+SH5_11;SH5_11 Cultural heritage, cultural memory
+SH6;SH6 - The Study of the Human Past: Archaeology, history and memory
+SH6_1;SH6_1 Archaeology, archaeometry, landscape archaeology
+SH6_2;SH6_2 Prehistory and protohistory
+SH6_3;SH6_3 Ancient history
+SH6_4;SH6_4 Medieval history
+SH6_5;SH6_5 Early modern history
+SH6_6;SH6_6 Modern and contemporary history
+SH6_7;SH6_7 Colonial and post-colonial history, global and transnational history, entangled histories
+SH6_8;SH6_8 Social and economic history
+SH6_9;SH6_9 gender history
+SH6_10;SH6_10 History of ideas, intellectual history, history of sciences and techniques
+SH6_11;SH6_11 Cultural history, history of collective identities and memories
+SH6_12;SH6_12 Historiography, theory and methods of history
+PE1;PE1 - Mathematics: All areas of mathematics, pure and applied, plus mathematical foundations of computer science, mathematical physics and statistics
+PE1_1;PE1_1 Logic and foundations
+PE1_2;PE1_2 Algebra
+PE1_3;PE1_3 Number theory
+PE1_4;PE1_4 Algebraic and complex geometry
+PE1_5;PE1_5 Geometry
+PE1_6;PE1_6 Topology
+PE1_7;PE1_7 Lie groups, Lie algebras
+PE1_8;PE1_8 Analysis
+PE1_9;PE1_9 Operator algebras and functional analysis
+PE1_10;PE1_10 ODE and dynamical systems
+PE1_11;PE1_11 Theoretical aspects of partial differential equations
+PE1_12;PE1_12 Mathematical physics
+PE1_13;PE1_13 Probability
+PE1_14;PE1_14 Statistics
+PE1_15;PE1_15 Discrete mathematics and combinatorics
+PE1_16;PE1_16 Mathematical aspects of computer science
+PE1_17;PE1_17 Numerical analysis
+PE1_18;PE1_18 Scientific computing and data processing
+PE1_19;PE1_19 Control theory and optimization
+PE1_20;PE1_20 Application of mathematics in sciences
+PE1_21;PE1_21 Application of mathematics in industry and society
+PE2;PE2 - Fundamental Constituents of Matter: Particle, nuclear, plasma, atomic,molecular, gas, and optical physics
+PE2_1;PE2_1 Fundamental interactions and fields
+PE2_2;PE2_2 Particle physics
+PE2_3;PE2_3 Nuclear physics
+PE2_4;PE2_4 Nuclear astrophysics
+PE2_5;PE2_5 Gas and plasma physics
+PE2_6;PE2_6 Electromagnetism
+PE2_7;PE2_7 Atomic, molecular physics
+PE2_8;PE2_8 Ultra-cold atoms and molecules
+PE2_9;PE2_9 Optics, non-linear optics and nano-optics
+PE2_10;PE2_10 Quantum optics and quantum information
+PE2_11;PE2_11 Lasers, ultra-short lasers and laser physics
+PE2_12;PE2_12 Acoustics
+PE2_13;PE2_13 Relativity
+PE2_14;PE2_14 Thermodynamics
+PE2_15;PE2_15 Non-linear physics
+PE2_16;PE2_16 General physics
+PE2_17;PE2_17 Metrology and measurement
+PE2_18;PE2_18 Statistical physics (gases)
+PE3;PE3 - Condensed Matter Physics: Structure, electronic properties, fluids, nanosciences, biophysics
+PE3_1;PE3_1 Structure of solids and liquids
+PE3_2;PE3_2 Mechanical and acoustical properties of condensed matter, Lattice dynamics
+PE3_3;PE3_3 Transport properties of condensed matter
+PE3_4;PE3_4 Electronic properties of materials, surfaces, interfaces, nanostructures…
+PE3_5;PE3_5 Semiconductors and insulators: material growth, physical properties
+PE3_6;PE3_6 Macroscopic quantum phenomena: superconductivity, superfluidity…
+PE3_7;PE3_7 Spintronics
+PE3_8;PE3_8 Magnetism and strongly correlated systems
+PE3_9;PE3_9 Condensed matter – beam interactions (photons, electrons…)
+PE3_10;PE3_10 Nanophysics: nanoelectronics, nanophotonics, nanomagnetism, nanoelectromechanics…
+PE3_12;PE3_12 Molecular electronics
+PE3_11;PE3_11 Mesoscopic physics
+PE3_13;PE3_13 Structure and dynamics of disordered systems: soft matter (gels, colloids, liquid crystals…), glasses, defects…
+PE3_14;PE3_14 Fluid dynamics (physics)
+PE3_15;PE3_15 Statistical physics: phase transitions, noise and fluctuations, models of complex systems…
+PE3_16;PE3_16 Physics of biological systems
+PE4;PE4 - Physical and Analytical Chemical Sciences: Analytical chemistry, chemical theory, physical chemistry/chemical physics
+PE4_1;PE4_1 Physical chemistry
+PE4_2;PE4_2 Spectroscopic and spectrometric techniques
+PE4_3;PE4_3 Molecular architecture and Structure
+PE4_4;PE4_4 Surface science and nanostructures
+PE4_5;PE4_5 Analytical chemistry
+PE4_6;PE4_6 Chemical physics
+PE4_7;PE4_7 Chemical instrumentation
+PE4_8;PE4_8 Electrochemistry, electrodialysis, microfluidics, sensors
+PE4_9;PE4_9 Method development in chemistry
+PE4_10;PE4_10 Heterogeneous catalysis
+PE4_11;PE4_11 Physical chemistry of biological systems
+PE4_12;PE4_12 Chemical reactions: mechanisms, dynamics, kinetics and catalytic reactions
+PE4_13;PE4_13 Theoretical and computational chemistry
+PE4_14;PE4_14 Radiation and Nuclear chemistry
+PE4_15;PE4_15 Photochemistry
+PE4_16;PE4_16 Corrosion
+PE4_17;PE4_17 Characterization methods of materials
+PE4_18;PE4_18 Environment chemistry
+PE5;PE5 - Synthetic Chemistry and Materials: Materials synthesis, structure-properties relations, functional and advanced materials, molecular architecture, organic chemistry
+PE5_1;PE5_1 Structural properties of materials
+PE5_2;PE5_2 Solid state materials
+PE5_3;PE5_3 Surface modification
+PE5_4;PE5_4 Thin films
+PE5_5;PE5_5 Ionic liquids
+PE5_6;PE5_6 New materials: oxides, alloys, composite, organic-inorganic hybrid, nanoparticles
+PE5_7;PE5_7 Biomaterials synthesis
+PE5_8;PE5_8 Intelligent materials – self assembled materials
+PE5_9;PE5_9 Coordination chemistry
+PE5_10;PE5_10 Colloid chemistry
+PE5_11;PE5_11 Biological chemistry
+PE5_12;PE5_12 Chemistry of condensed matter
+PE5_13;PE5_13 Homogeneous catalysis
+PE5_14;PE5_14 Macromolecular chemistry
+PE5_15;PE5_15 Polymer chemistry
+PE5_16;PE5_16 Supramolecular chemistry
+PE5_17;PE5_17 Organic chemistry
+PE5_18;PE5_18 Molecular chemistry
+PE5_19;PE5_19 Combinatorial chemistry
+PE6;PE6 - Computer Science and Informatics: Informatics and information systems, computer science, scientific computing, intelligent systems
+PE6_1;PE6_1 Computer architecture, pervasive computing, ubiquitous computing
+PE6_2;PE6_2 Computer systems, parallel/distributed systems, sensor networks, embedded systems, cyber-physical systems
+PE6_3;PE6_3 Software engineering, operating systems, computer languages
+PE6_4;PE6_4 Theoretical computer science, formal methods, and quantum computing
+PE6_5;PE6_5 Cryptology, security, privacy, quantum crypto
+PE6_6;PE6_6 Algorithms, distributed, parallel and network algorithms, algorithmic game theory
+PE6_7;PE6_7 Artificial intelligence, intelligent systems, multi agent systems
+PE6_8;PE6_8 Computer graphics, computer vision, multi media, computer games
+PE6_9;PE6_9 Human computer interaction and interface, visualization and natural language processing
+PE6_10;PE6_10 Web and information systems, database systems, information retrieval and digital libraries, data fusion
+PE6_11;PE6_11 Machine learning, statistical data processing and applications using signal processing (e.g. speech, image, video)
+PE6_12;PE6_12 Scientific computing, simulation and modelling tools
+PE6_13;PE6_13 Bioinformatics, biocomputing, and DNA and molecular computation
+PE7;PE7 - Systems and Communication Engineering: Electronic, communication, optical and systems engineering
+PE7_1;PE7_1 Control engineering
+PE7_2;PE7_2 Electrical and electronic engineering: semiconductors, components, systems
+PE7_3;PE7_3 Simulation engineering and modelling
+PE7_4;PE7_4 Systems engineering, sensorics, actorics, automation
+PE7_5;PE7_5 Micro- and nanoelectronics, optoelectronics
+PE7_6;PE7_6 Communication technology, high-frequency technology
+PE7_7;PE7_7 Signal processing
+PE7_8;PE7_8 Networks (communication networks, sensor networks, networks of robots...)
+PE7_9;PE7_9 Man-machine-interfaces
+PE7_10;PE7_10 Robotics
+PE8;PE8 - Products and Processes Engineering: Product design, proces s design and control, construction methods, civil engineering, energy systems, material engineering
+PE8_1;PE8_1 Aerospace engineering
+PE8_2;PE8_2 Chemical engineering, technical chemistry
+PE8_3;PE8_3 Civil engineering, maritime/hydraulic engineering, geotechnics, waste treatment
+PE8_4;PE8_4 Computational engineering
+PE8_5;PE8_5 Fluid mechanics, hydraulic-, turbo-, and piston engines
+PE8_6;PE8_6 Energy systems (production, distribution, application)
+PE8_7;PE8_7 Micro (system) engineering
+PE8_8;PE8_8 Mechanical and manufacturing engineering (shaping, mounting, joining, separation)
+PE8_9;PE8_9 Materials engineering (biomaterials, metals, ceramics, polymers, composites…)
+PE8_10;PE8_10 Production technology, process engineering
+PE8_11;PE8_11 Industrial design (product design, ergonomics, man-machine interfaces…)
+PE8_12;PE8_12 Sustainable design (for recycling, for environment, eco-design)
+PE8_13;PE8_13 Lightweight construction, textile technology
+PE8_14;PE8_14 Industrial bioengineering
+PE8_15;PE8_15 Industrial biofuel production
+PE8_16;PE8_16 Architectural engineering
+PE9;"PE9 - Universe Sciences: Astro-physics/chemistry/biology; solar system; stellar, galactic and extragalactic astronomy, planetary systems, cosmology, space science, instrumentation"
+PE9_1;PE9_1 Solar and interplanetary physics
+PE9_2;PE9_2 Planetary systems sciences
+PE9_3;PE9_3 Interstellar medium
+PE9_4;PE9_4 Formation of stars and planets
+PE9_5;PE9_5 Astrobiology
+PE9_6;PE9_6 Stars and stellar systems
+PE9_7;PE9_7 The Galaxy
+PE9_8;PE9_8 Formation and evolution of galaxies
+PE9_9;PE9_9 Clusters of galaxies and large scale structures
+PE9_10;PE9_10 High energy and particles astronomy – X-rays, cosmic rays, gamma rays, neutrinos
+PE9_11;PE9_11 Relativistic astrophysics
+PE9_12;PE9_12 Dark matter, dark energy
+PE9_13;PE9_13 Gravitational astronomy
+PE9_14;PE9_14 Cosmology
+PE9_15;PE9_15 Space Sciences
+PE9_16;PE9_16 Very large data bases: archiving, handling and analysis
+PE9_17;PE9_17 Instrumentation - telescopes, detectors and techniques
+PE10;PE10 - Earth System Science: Physical geography, geology, geophysics, atmospheric sciences, oceanography, climatology, ecology, global environmental change, biogeochemical cycles, natural resources management
+PE10_1;PE10_1 Atmospheric chemistry, atmospheric composition, air pollution
+PE10_2;PE10_2 Meteorology, atmospheric physics and dynamics
+PE10_3;PE10_3 Climatology and climate change
+PE10_4;PE10_4 Terrestrial ecology, land cover change
+PE10_5;PE10_5 Geology, tectonics, volcanology
+PE10_6;PE10_6 Paleoclimatology, paleoecology
+PE10_7;PE10_7 Physics of earth’s interior, seismology, volcanology
+PE10_8;PE10_8 Oceanography (physical, chemical, biological, geological)
+PE10_9;PE10_9 Biogeochemistry, biogeochemical cycles, environmental chemistry
+PE10_10;PE10_10 Mineralogy, petrology, igneous petrology, metamorphic petrology
+PE10_11;PE10_11 Geochemistry, crystal chemistry, isotope geochemistry, thermodynamics
+PE10_12;PE10_12 Sedimentology, soil science, palaeontology, earth evolution
+PE10_13;PE10_13 Physical geography
+PE10_14;PE10_14 Earth observations from space/remote sensing
+PE10_15;PE10_15 Geomagnetism, paleomagnetism
+PE10_16;PE10_16 Ozone, upper atmosphere, ionosphere
+PE10_17;PE10_17 Hydrology, water and soil pollution
+PE10_18;PE10_18 Cryosphere, dynamics of snow and ice cover, sea ice, permafrosts and ice sheets
+LS1;LS1 - Molecular and Structural Biology and Biochemistry: Molecular synthesis, modification and interaction, biochemistry, biophysics, structural biology, metabolism, signal transduction
+LS1_1;LS1_1 Molecular interactions
+LS1_2;LS1_2 General biochemistry and metabolism
+LS1_3;LS1_3 DNA synthesis, modification, repair, recombination and degradation
+LS1_4;LS1_4 RNA synthesis, processing, modification and degradation
+LS1_5;LS1_5 Protein synthesis, modification and turnover
+LS1_6;LS1_6 Lipid synthesis, modification and turnover
+LS1_7;LS1_7 Carbohydrate synthesis, modification and turnover
+LS1_8;LS1_8 Biophysics (e.g. transport mechanisms, bioenergetics, fluorescence)
+LS1_9;LS1_9 Structural biology (crystallography and EM)
+LS1_10;LS1_10 Structural biology (NMR)
+LS1_11;LS1_11 Biochemistry and molecular mechanisms of signal transduction
+LS2;LS2 - Genetics, Genomics, Bioinformatics and Systems Biology: Molecular and population genetics, genomics, transcriptomics, proteomics, metabolomics, bioinformatics, computational biology, biostatistics, biological modelling and simulation, systems biolog
+LS2_1;LS2_1 Genomics, comparative genomics, functional genomics
+LS2_2;LS2_2 Transcriptomics
+LS2_3;LS2_3 Proteomics
+LS2_4;LS2_4 Metabolomics
+LS2_5;LS2_5 Glycomics
+LS2_6;LS2_6 Molecular genetics, reverse genetics and RNAi
+LS2_7;LS2_7 Quantitative genetics
+LS2_8;LS2_8 Epigenetics and gene regulation
+LS2_9;LS2_9 Genetic epidemiology
+LS2_10;LS2_10 Bioinformatics
+LS2_11;LS2_11 Computational biology
+LS2_12;LS2_12 Biostatistics
+LS2_13;LS2_13 Systems biology
+LS2_14;LS2_14 Biological systems analysis, modelling and simulation
+LS3;LS3 - Cellular and Developmental Biology: Cell biology, cell physiology, signal transduction, organogenesis, developmental genetics, pattern formation in plants and animals, stem cell biology
+LS3_1;LS3_1 Morphology and functional imaging of cells
+LS3_2;LS3_2 Cell biology and molecular transport mechanisms
+LS3_3;LS3_3 Cell cycle and division
+LS3_4;LS3_4 Apoptosis
+LS3_5;LS3_5 Cell differentiation, physiology and dynamics
+LS3_6;LS3_6 Organelle biology
+LS3_7;LS3_7 Cell signalling and cellular interactions
+LS3_8;LS3_8 Signal transduction
+LS3_9;LS3_9 Development, developmental genetics, pattern formation and embryology in animals
+LS3_10;LS3_10 Development, developmental genetics, pattern formation and embryology in plants
+LS3_11;LS3_11 Cell genetics
+LS3_12;LS3_12 Stem cell biology
+LS4;LS4 - Physiology, Pathophysiology and Endocrinology: Organ physiology, pathophysiology, endocrinology, metabolism, ageing, tumorigenesis, cardiovascular disease, metabolic syndrome
+LS4_1;LS4_1 Organ physiology and pathophysiology
+LS4_2;LS4_2 Comparative physiology and pathophysiology
+LS4_3;LS4_3 Endocrinology
+LS4_4;LS4_4 Ageing
+LS4_5;LS4_5 Metabolism, biological basis of metabolism related disorders
+LS4_6;LS4_6 Cancer and its biological basis
+LS4_7;LS4_7 Cardiovascular diseases
+LS4_8;LS4_8 Non-communicable diseases (except for neural/psychiatric, immunity-related, metabolism-related disorders, cancer and cardiovascular diseases)
+LS5;LS5 - Neurosciences and Neural Disorders: Neurobiology, neuroanatomy, neurophysiology, neurochemistry, neuropharmacology, neuroimaging, systems neuroscience, neurological a nd psychiatric disorders
+LS5_1;LS5_1 Neuroanatomy and neurophysiology
+LS5_2;LS5_2 Molecular and cellular neuroscience
+LS5_3;LS5_3 Neurochemistry and neuropharmacology
+LS5_4;LS5_4 Sensory systems (e.g. visual system, auditory system)
+LS5_5;LS5_5 Mechanisms of pain
+LS5_6;LS5_6 Developmental neurobiology
+LS5_7;LS5_7 Cognition (e.g. learning, memory, emotions, speech)
+LS5_8;LS5_8 Behavioural neuroscience (e.g. sleep, consciousness, handedness)
+LS5_9;LS5_9 Systems neuroscience
+LS5_10;LS5_10 Neuroimaging and computational neuroscience
+LS5_11;LS5_11 Neurological disorders (e.g. Alzheimer’s disease, Huntington’s disease, Parkinson’s disease)
+LS5_12;LS5_12 Psychiatric disorders (e.g. schizophrenia, autism, Tourette’s syndrome, obsessive compulsive disorder, depression, bipolar disorder, attention deficit hyperactivity disorder)
+LS6;LS6 - Immunity and Infection: The immune system and related disorders, infectious agents and diseases, prevention and treatment of infection
+LS6_1;LS6_1 Innate immunity and inflammation
+LS6_2;LS6_2 Adaptive immunity
+LS6_3;LS6_3 Phagocytosis and cellular immunity
+LS6_4;LS6_4 Immunosignalling
+LS6_5;LS6_5 Immunological memory and tolerance
+LS6_6;LS6_6 Immunogenetics
+LS6_7;LS6_7 Microbiology
+LS6_8;LS6_8 Virology
+LS6_9;LS6_9 Bacteriology
+LS6_10;LS6_10 Parasitology
+LS6_11;LS6_11 Prevention and treatment of infection by pathogens (e.g. vaccination, antibiotics, fungicide)
+LS6_12;LS6_12 Biological basis of immunity related disorders (e.g. autoimmunity)
+LS6_13;LS6_13 Veterinary medicine and infectious diseases in animals
+LS7;LS7 - Diagnostic Tools, Therapies and Public Health: Aetiology, diagnosis and treatment of disease, public health, epidemiology, pharmacology, clinical medicine, regenerative medicine, medical ethics
+LS7_1;LS7_1 Medical engineering and technology
+LS7_2;LS7_2 Diagnostic tools (e.g. genetic, imaging)
+LS7_3;LS7_3 Pharmacology, pharmacogenomics, drug discovery and design, drug therapy
+LS7_4;LS7_4 Analgesia and Surgery
+LS7_5;LS7_5 Toxicology
+LS7_6;LS7_6 Gene therapy, cell therapy, regenerative medicine
+LS7_7;LS7_7 Radiation therapy
+LS7_8;LS7_8 Health services, health care research metabolism-related disorders, cancer and cardiovascular diseases)
+LS7_9;LS7_9 Public health and epidemiology
+LS7_10;LS7_10 Environment and health risks, occupational medicine
+LS7_11;LS7_11 Medical ethics
+LS8;LS8 - Evolutionary, Population and Environmental Biology: Evolution, ecology, animal behaviour ,
+LS8_1;"LS8_1 Ecology (theoretical and experimental; population, species and community level)"
+LS8_2;LS8_2 Population biology, population dynamics, population genetics
+LS8_3;LS8_3 Systems evolution, biological adaptation, phylogenetics, systematics, comparative biology
+LS8_4;LS8_4 Biodiversity, conservation biology, conservation genetics, invasion biology
+LS8_5;LS8_5 Evolutionary biology: evolutionary ecology and genetics, co-evolution
+LS8_6;LS8_6 Biogeography, macro-ecology
+LS8_7;LS8_7 Animal behaviour
+LS8_8;LS8_8 Environmental and marine biology
+LS8_9;LS8_9 Environmental toxicology at the population and ecosystems level
+LS8_10;LS8_10 Microbial ecology and evolution
+LS8_11;LS8_11 Species interactions (e.g. food-webs, symbiosis, parasitism, mutualism)
+LS9;"LS9 - Applied life Sciences and Non-Medical Biotechnology: Agricultural, animal, fishery, forestry and food sciences; biotechnology, genetic engineering, synthetic and chemical biology, industrial biosciences; environmental biotechnology and remediation"
+LS9_1;LS9_1 Applied genetic engineering, transgenic organisms, recombinant proteins,biosensors
+LS9_2;LS9_2 Synthetic biology, chemical biology and new bio-engineering concepts
+LS9_3;LS9_3 Agriculture related to animal husbandry, dairying, livestock raising
+LS9_4;LS9_4 Aquaculture, fisheries
+LS9_5;LS9_5 Agriculture related to crop production, soil biology and cultivation, applied plant biology
+LS9_6;LS9_6 Food sciences
+LS9_7;LS9_7 Forestry, biomass production (e.g. for biofuels)
+LS9_8;LS9_8 Environmental biotechnology, bioremediation, biodegradation
+LS9_9;LS9_9 Applied biotechnology (non-medical), bioreactors, applied microbiology
+LS9_10;LS9_10 Biomimetics
+LS9_11;LS9_11 Biohazards, biological containment, biosafety, biosecurity
+ACCF;ACCF - Settore Servizi bibliotecari Cesena e Forlì
+ACRA;ACRA - Settore Biblioteca centrale Ravenna
+ACRN;ACRN - Settore Biblioteca centrale Rimini
+2022;Biblioteca di Ingegneria e Architettura
+2026;"Biblioteca interdipartimentale di Agraria ""Gabriele Goidanich"""
+Organi;Organi
+CUG;Comitato Unico di Garanzia per le pari opportunità, la valorizzazione del benessere di chi lavora e contro le discriminazioni nel lavoro
+AreeAmministrative;Aree Amministrative
+ABIS-AreaBibliotecheeServizialloStudio;Area Biblioteche e Servizi allo Studio - ABIS
+Eco;Centro Internazionale di Studi Umanistici 'Umberto Eco'
+CAST;Centro di Studi Avanzati sul Turismo - CAST
+BO213;"Biblioteca Umanistica ""Ezio Raimondi"""
+biblioteche;Biblioteche
+ARPAC;ARPAC - Area Patrimonio Culturale
+4082;ARIC - Area Ricerca
+4744;Centro di Ateneo per la tutela e promozione della salute e sicurezza - Ufficio Formazione sicurezza
+SIAMOC;Società Italiana di Analisi del Movimento in Clinica
+795400;Dipartimento di Filosofia - FILO
+centri;Centri
+BUB;Biblioteca Universitaria di Bologna - BUB

@@ -327,13 +327,19 @@ def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1):
     #fig.show()
     return fig
 
-def plot_structures(df, param, min_year="", max_year="", threshold=1):
+def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=None):
     df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
     df_filtered[param] = df.apply(
         lambda r: r[param] if r["count"] > threshold else "Other", axis=1
     )
     # merge all Other rows into one
     df_grouped = df_filtered.groupby(param)["count"].sum().reset_index()
+    if map:
+        df_grouped = (df_grouped.merge(df_map, left_on="structure", right_on="subjectid", how="left")
+                      .drop(columns=["subjectid", "structure"])
+                      .rename(columns={"name": param}))
+        df_grouped["structure"] = df_grouped["structure"].str.split(" - ").str[-1]
+        print(df_grouped)
     fig = px.treemap(
         df_grouped,
         path=[param],
@@ -364,6 +370,8 @@ def plot_creators(df, min_year="", max_year="", top_n=100):
 
 if __name__ == "__main__":
     start_years = [2017, 2020, 2023]
+
+    subjects_and_structures = pd.read_csv("subject_structure_map.csv", sep=";", quotechar='"', encoding="utf-8")
     
     collection = connect_to_db("mongodb://localhost:27017/",  "admin", "amsacta_documenti")
 
@@ -427,7 +435,12 @@ if __name__ == "__main__":
             end_year = start_year + 2
             structures = get_subjects_or_structures(collection, type="structures")
             print("Structures are: ", structures)
-            structures_plot = plot_structures(df=structures, param="structure", threshold=0, min_year=start_year, max_year=end_year)
+            structures_plot = plot_structures(df=structures, 
+                                              param="structure", 
+                                              threshold=0, 
+                                              min_year=start_year, 
+                                              max_year=end_year,
+                                              df_map=subjects_and_structures)
             f.write(structures_plot.to_html(full_html=False, include_plotlyjs=False))
 
         f.write("<h1>Progetti</h1>")
