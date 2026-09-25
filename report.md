@@ -16,9 +16,9 @@ Scarica il file CSV: [documents_2017-2025_dataset.csv](documents_2017-2025_datas
 
 Scarica il file CSV: [relatedid_2017-2025.csv](relatedid_2017-2025.csv)
 
-## Volume di dati
+## Volume dei dataset
 
-![Volume di dati](sizes.png)
+![Volume dei dataset](sizes.png)
 
 Scarica il file CSV: [sizes.csv](sizes.csv)
 

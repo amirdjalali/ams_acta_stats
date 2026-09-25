@@ -283,7 +283,7 @@ def plot_size_historgram(df, min_year=None, max_year=None):
         df_filtered,
         x=df_filtered["year"].astype(str),
         y="total_filesize",
-        title="Total Filesize by Year (GB)",
+        title="Total Filesize by Year (GB, log scale)",
         log_y=True
     )
     fig.update_yaxes(
@@ -425,10 +425,10 @@ if __name__ == "__main__":
         r.write("\n## Dataset con collegamento a pubblicazione\n")
         f.write(related_plot.to_html(full_html=False, include_plotlyjs=False))
         r.write("\n![Dataset con collegamento a pubblicazione](relatedid_2017-2025.png)\n\nScarica il file CSV: [relatedid_2017-2025.csv](relatedid_2017-2025.csv)\n")
-        f.write("<h1>Volume di dati</h1>")
-        r.write("\n## Volume di dati\n")
+        f.write("<h1>Volume dei dataset</h1>")
+        r.write("\n## Volume dei dataset\n")
         f.write(gbs.to_html(full_html=False, include_plotlyjs=False))
-        r.write("\n![Volume di dati](sizes.png)\n\nScarica il file CSV: [sizes.csv](sizes.csv)\n")
+        r.write("\n![Volume dei dataset](sizes.png)\n\nScarica il file CSV: [sizes.csv](sizes.csv)\n")
 
         f.write("<h1>Settori disciplinari</h1>")
         r.write("\n## Settori disciplinari\n")
