@@ -15,7 +15,8 @@ def connect_to_db(client_url, db_name, collection_name):
     collection = db["amsacta_documenti"]
     return collection
 
-def get_subjects(collection):
+def get_subjects_or_structures(collection, type="subjects"):
+    singular = type[:-1]
     pipeline = [
         {
             "$match": {
@@ -25,21 +26,21 @@ def get_subjects(collection):
         },
         {
             "$addFields": {
-                "subjects": {
+                type: {
                     "$cond": {
-                        "if": { "$isArray": "$subjects" },
-                        "then": "$subjects",
-                        "else": { "$concatArrays": [["$subjects"]] }
+                        "if": { "$isArray": f"${type}" },
+                        "then": f"${type}",
+                        "else": { "$concatArrays": [[f"${type}"]] }
                     }
                 }
             }
         },
-        { "$unwind": "$subjects" },
+        { "$unwind": f"${type}" },
         {
             "$group": {
                 "_id": {
                     "year": { "$year": { "$toDate": "$datestamp" } },
-                    "subject": "$subjects"
+                    singular: f"${type}"
                 },
                 "count": { "$sum": 1 }
             }
@@ -51,8 +52,8 @@ def get_subjects(collection):
     df = pd.json_normalize(results).astype({
         "count": int,
         "_id.year": int,
-        "_id.subject": str
-    })
+        f"_id.{singular}": str
+    }).rename(columns={f"_id.{singular}": singular, "_id.year": "year"})
     
     return df
 
@@ -83,7 +84,7 @@ def get_types(collection):
         "_id.year": "year",
         "_id.type": "type"
     })
-    print(df)
+
     return df
 
 def get_filesize(collection):
@@ -165,7 +166,6 @@ def get_funding_info(collection, param, start_year, end_year):
 
     results = list(collection.aggregate(pipeline))
     df = pd.json_normalize(results).rename(columns={"_id": param})
-    print(df)
     return df
 
 def get_creators(collection, start_year, end_year):
@@ -204,7 +204,6 @@ def get_creators(collection, start_year, end_year):
         "_id.family": "family",
         "_id.given": "given"
     })
-    print(df)
     return df
 
 def get_related_id(collection):
@@ -240,7 +239,6 @@ def get_related_id(collection):
         "_id.year": "year",
         "_id.has_relatedid": "has_relatedid"
     })
-    print(df)
     return df
 
     results = list(collection.aggregate(pipeline))
@@ -257,27 +255,22 @@ def export_by_year(df, date_list=None):
     pivot.reset_index().to_csv("subjects.csv", index=False)
     return pivot
 
-def plot_pie_chart(df, param, threshold=0, start_year=None, end_year=None):
+def plot_subject_chart(df, param, threshold=0, start_year=None, end_year=None):
     date_list = range(start_year, end_year+1)
-    df = df.loc[df["_id.year"].isin(date_list)]
-    df = df.rename(columns={"_id.subject": "subject"})
+    df = df.loc[df["year"].isin(date_list)]
     df["macro_sector"] = df.apply(lambda row: row.subject.split("-")[0], axis=1)
-    print(df)
     counts_macro_sectors = df.groupby("macro_sector")["count"].sum()
     counts_subjects = df.groupby("subject")["count"].sum()
 
     macro_sectors_dict = counts_macro_sectors.to_dict()
     subjects_dict = counts_subjects.to_dict()
-    print(subjects_dict)
     df_clean = df.copy()
     # remove macro_sector if count < min
     df_clean["macro_sector"] = [label if macro_sectors_dict[label] > threshold else "other" for label in df["macro_sector"]]
     # remove also subject if macro sector is other
     df_clean.loc[df_clean["macro_sector"] == "other", "subject"] = "other"
-    print(df)
     # remove subject is subject count is lesser than min
     df_clean["subject"] = [label if subjects_dict.get(label, 0) > threshold else "other" for label in df_clean["subject"]]
-    print(df_clean)
     fig2 = px.sunburst(df_clean, path=["macro_sector", "subject"], values="count", title=f"Subjects Distribution, {start_year}, {end_year}")
     #fig2.show()  # opens in browser
     df_clean.to_csv(f"{param}_{start_year}_{end_year}.csv", index=False, encoding="utf-8")
@@ -329,6 +322,23 @@ def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1):
         path=[param],
         values="count",
         title=f"Funding information ({param}), {min_year}, {max_year}"
+    )
+    df_grouped.to_csv(f"{param}_{min_year}-{max_year}.csv", index=False, encoding="utf-8")
+    #fig.show()
+    return fig
+
+def plot_structures(df, param, min_year="", max_year="", threshold=1):
+    df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
+    df_filtered[param] = df.apply(
+        lambda r: r[param] if r["count"] > threshold else "Other", axis=1
+    )
+    # merge all Other rows into one
+    df_grouped = df_filtered.groupby(param)["count"].sum().reset_index()
+    fig = px.treemap(
+        df_grouped,
+        path=[param],
+        values="count",
+        title=f"Structures, {min_year}, {max_year}"
     )
     df_grouped.to_csv(f"{param}_{min_year}-{max_year}.csv", index=False, encoding="utf-8")
     #fig.show()
@@ -407,10 +417,18 @@ if __name__ == "__main__":
         f.write("<h1>Settori disciplinari</h1>")
         for start_year in start_years:
             end_year = start_year + 2
-            subjects = get_subjects(collection)
+            subjects = get_subjects_or_structures(collection)
             threshold = 5 if start_year > 2019 else 1
-            subjects_plot = plot_pie_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
+            subjects_plot = plot_subject_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
             f.write(subjects_plot.to_html(full_html=False, include_plotlyjs=False))
+
+        f.write("<h1>Strutture</h1>")
+        for start_year in start_years:
+            end_year = start_year + 2
+            structures = get_subjects_or_structures(collection, type="structures")
+            print("Structures are: ", structures)
+            structures_plot = plot_structures(df=structures, param="structure", threshold=0, min_year=start_year, max_year=end_year)
+            f.write(structures_plot.to_html(full_html=False, include_plotlyjs=False))
 
         f.write("<h1>Progetti</h1>")
         for start_year in start_years:
