@@ -336,7 +336,7 @@ def plot_simple_subject_chart(df, param, threshold=0, start_year=None, end_year=
     )
 
     filename = f"{OUT_DIR}/simple_{param}_{start_year}-{end_year}"
-    counts[["macro_sector"]].to_csv(f"{filename}.csv", index=False, encoding="utf-8")
+    counts[["macro_sector", "count"]].to_csv(f"{filename}.csv", index=False, encoding="utf-8")
     fig.write_image(f"{filename}.png")
     return fig, filename
 
@@ -610,6 +610,7 @@ if __name__ == "__main__":
         r.write(f"\n![Volume dei dataset]({sizes_filename}.png)\n\nScarica il file CSV: [{sizes_filename}.csv]({sizes_filename}.csv)\n")
         f.write(grouped_sizes_plot.to_html(full_html=False, include_plotlyjs=False))
         f.write("Scarica il file CSV: <a href='" + grouped_sizes_filename + ".csv' download>Download CSV</a><br>")
+        r.write(f"\n![Volume dei dataset]({grouped_sizes_filename}.png)\n\nScarica il file CSV: [{grouped_sizes_filename}.csv]({grouped_sizes_filename}.csv)\n")
 
         f.write("<h1>Settori disciplinari (dataset e software)</h1>")
         r.write("\n## Settori disciplinari\n")

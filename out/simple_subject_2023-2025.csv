@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 macro_sector
 AGR
 BIO
@@ -14,3 +15,20 @@ SH5
 SPS
 VET
 other
+=======
+macro_sector,count
+AGR,76
+BIO,29
+CHIM,70
+FIS,19
+ICAR,18
+INF,7
+ING,42
+L,52
+M,27
+MED,20
+SH5,6
+SPS,10
+VET,43
+other,116
+>>>>>>> 7b06e15ba2287f2970058076d7cd064a52b265c7

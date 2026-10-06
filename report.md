@@ -34,6 +34,10 @@ Scarica il file CSV: [out/relatedid_2015-2019_2020-2022_2023-2025.csv](out/relat
 
 Scarica il file CSV: [out/sizes_2015-2025.csv](out/sizes_2015-2025.csv)
 
+![Volume dei dataset](out/sizes_2015-2019_2020-2022_2023-2025_.png)
+
+Scarica il file CSV: [out/sizes_2015-2019_2020-2022_2023-2025_.csv](out/sizes_2015-2019_2020-2022_2023-2025_.csv)
+
 ## Settori disciplinari
 
 ![Settori disciplinari](out/subject_2015-2019.png)
