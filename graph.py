@@ -129,10 +129,49 @@ def get_filesize(collection):
     
     return df
 
-def get_funding_info(collection, param, start_year, end_year):
+def get_funding_info(collection, param, start_year, end_year, get_all=False):
     start_date=f"{start_year}-01-01"
     end_date=f"{end_year+1}-01-01"
-    pipeline = [
+    if get_all:
+        pipeline = [
+            {
+                "$match": {
+                    "datestamp": {
+                        "$gt": start_date,
+                        "$lt": end_date
+                    },
+                    "type": "dataset"
+                }
+            },
+            {
+                "$addFields": {
+                    param: {
+                        "$ifNull": [f"${param}", "None"]
+                    }
+                }
+            },
+            {
+                "$project": {
+                    param: 1,
+                    "_id": 0
+                }
+            },
+            {
+                "$group": {
+                    "_id": f"${param}",
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "count": -1
+                }
+            }
+        ]
+    else:        
+        pipeline = [
         {
             "$match": {
                 "datestamp": {
@@ -439,7 +478,9 @@ def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1):
         df_grouped,
         path=[param],
         values="count",
-        title=f"Funding information ({param}), {min_year}-{max_year}"
+        title=f"Funding information ({param}), {min_year}-{max_year}",
+        color=param,
+        color_discrete_map={"None": "grey"}
     )
     filename = f"{OUT_DIR}/{param}_{min_year}-{max_year}"
     df_grouped.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
@@ -605,7 +646,7 @@ if __name__ == "__main__":
         for start_year in start_years:
             param = "projectacronym"
             end_year = start_year + 2 if start_year > 2015 else start_year + 4
-            projects = get_funding_info(collection, param, start_year, end_year)
+            projects = get_funding_info(collection, param, start_year, end_year, get_all=True)
             projects_plot, projects_filename = plot_funding_treemap(projects, param, start_year, end_year)
             f.write(projects_plot.to_html(full_html=False, include_plotlyjs=False))
             f.write("Scarica il file CSV: <a href='" + projects_filename + ".csv' download>Download CSV</a><br>")
@@ -615,7 +656,7 @@ if __name__ == "__main__":
         r.write("\n## Enti finanziatori\n")
         for start_year in start_years:
             end_year = start_year + 2 if start_year > 2015 else start_year + 4
-            funders = get_funding_info(collection, "funder", start_year, end_year)
+            funders = get_funding_info(collection, "funder", start_year, end_year, get_all=True)
             funders_plot, funders_filename = plot_funding_treemap(funders, "funder", start_year, end_year)
             f.write(funders_plot.to_html(full_html=False, include_plotlyjs=False))
             f.write("Scarica il file CSV: <a href='" + funders_filename + ".csv' download>Download CSV</a><br>")
