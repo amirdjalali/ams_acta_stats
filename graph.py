@@ -349,7 +349,8 @@ def plot_size_histogram(df, min_year=None, max_year=None):
         x=df_filtered["year"].astype(str),
         y="total_filesize",
         title="Total Filesize by Year (GB, log scale)",
-        log_y=True
+        log_y=True,
+        color_discrete_sequence=["#AB63FA"] 
     )
     fig.update_yaxes(
         title_text="",        # remove y axis label
@@ -383,6 +384,7 @@ def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026]):
         y="total_filesize",
         title="Total Filesize by Year Range (GB, log scale)",
         log_y=True,
+        color_discrete_sequence=["#AB63FA"] 
     )
     fig.update_xaxes(title_text="")
     fig.update_yaxes(
@@ -658,8 +660,8 @@ if __name__ == "__main__":
     related = related.rename(columns={"has_relatedid": "type"})
     related["type"] = related["type"].map({True: "has relatedid", False: "no relatedid"})
     RELATED_COLOR_MAP ={
-        "has relatedid": "#636EFA",
-        "no relatedid": "#636EFA"
+        "has relatedid": "#AB63FA",
+        "no relatedid": "#AB63FA"
     }
     RELATED_PATTERN_MAP ={
             "has relatedid": "/",
