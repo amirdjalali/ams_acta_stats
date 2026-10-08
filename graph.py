@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.io as pio
+from itertools import cycle
 
 OUT_DIR = "out"
 
@@ -399,7 +400,13 @@ def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026]):
     fig.write_image(f"{filename}.png")
     return fig, filename
 
-def plot_histogram(df, min_year=0, max_year=9999, type_filter=None, filename="documents", collapse_all=True):
+def plot_histogram(df, min_year=0, 
+                   max_year=9999, 
+                   type_filter=None, 
+                   filename="documents", 
+                   collapse_all=True,
+                   color_map=None,
+                   pattern_map=None):
     df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
     filter_string = ""
     if type_filter:
@@ -415,7 +422,10 @@ def plot_histogram(df, min_year=0, max_year=9999, type_filter=None, filename="do
         df_filtered,
         x=df_filtered["year"].astype(str),
         y="count",
+        color_discrete_map=color_map,
+        pattern_shape_map=pattern_map,
         color="type",
+        pattern_shape="type",
         title=f"Documents by Year, {min_year}-{max_year}" + (f" — {type_filter}" if type_filter else ""),
         barmode="stack"
         )
@@ -425,7 +435,13 @@ def plot_histogram(df, min_year=0, max_year=9999, type_filter=None, filename="do
     fig.write_image(f"{filename}.png")
     return fig, filename
 
-def plot_grouped_histogram(df, bins=[2015, 2020, 2023, 2026], type_filter=None, filename="documents", collapse_all=True):
+def plot_grouped_histogram(df, 
+                           bins=[2015, 2020, 2023, 2026],
+                           type_filter=None,
+                           filename="documents",
+                           collapse_all=True,
+                           color_map=None,
+                           pattern_map=None):
     labels = [f"{s}-{e - 1}" for s, e in zip(bins[:-1], bins[1:])]
     df_filtered = df[(df["year"] >= bins[0]) & (df["year"] < bins[-1])].copy()
     df_filtered["year_range"] = pd.cut(
@@ -454,6 +470,9 @@ def plot_grouped_histogram(df, bins=[2015, 2020, 2023, 2026], type_filter=None, 
             x=df_grouped["year_range"].astype(str),
             y="count",
             color="type",
+            pattern_shape="type",
+            color_discrete_map=color_map,
+            pattern_shape_map=pattern_map,
             title=f"Documents by Year" + (f" — {type_filter}" if type_filter else ""),
             barmode="stack"
             )
@@ -487,14 +506,14 @@ def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1):
     fig.write_image(f"{filename}.png")
     return fig, filename
 
-def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=None):
+def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=None, color_scheme=None, pattern_scheme=None):
     df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
     df_filtered[param] = df.apply(
         lambda r: r[param] if r["count"] > threshold else "Other", axis=1
     )
     # merge all Other rows into one
     df_grouped = df_filtered.groupby(param)["count"].sum().reset_index()
-    if map:
+    if df_map is not None:
         df_grouped = (df_grouped.merge(df_map, left_on="structure", right_on="subjectid", how="left")
                       .drop(columns=["subjectid", "structure"])
                       .rename(columns={"name": param}))
@@ -504,8 +523,11 @@ def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=Non
         df_grouped,
         path=[param],
         values="count",
-        title=f"Structures, {min_year}-{max_year}"
+        title=f"Structures, {min_year}-{max_year}",
+        color=param,
+        color_discrete_map=color_scheme
     )
+    fig = apply_global_patterns(fig, pattern_scheme)
     filename = f"{OUT_DIR}/{param}_{min_year}-{max_year}"
     df_grouped.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
     fig.write_image(f"{filename}.png")
@@ -530,104 +552,206 @@ def plot_creators(df, min_year="", max_year="", top_n=100):
     fig.write_image(f"{filename}.png")
     return fig, filename
 
+def map_subjects_or_structures(collection, type="subjects", df_map=None):
+    if type == "types":
+        df = get_types(collection)
+    else:
+        df = get_subjects_or_structures(collection, type)
+    print(df)
+    if type == "subjects":
+        df["cat"] = df.apply(lambda row: row.df.split("-")[0], axis=1)
+    elif df_map is not None:
+        df = (df.merge(df_map, left_on="structure", right_on="subjectid", how="left")
+                        .drop(columns=["subjectid", "structure"])
+            )
+        print(df)
+        df["name"] = df["name"].str.split(" - ").str[-1]
+        df = df.rename(columns={"name": "cat"})
+    elif type == "types":
+        df = df.rename(columns={"type": "cat"})
+    print(df)
+    categories = sorted(df["cat"].unique())
+    print(categories)
+    # px.colors.qualitative.Plotly
+    # px.colors.qualitative.Set1
+    # px.colors.qualitative.Pastel
+    # px.colors.qualitative.Dark24   # 24 colors, good for many categories
+    # px.colors.qualitative.Light24  # 24 light colors
+    colors = cycle(px.colors.qualitative.Plotly)
+    shapes = cycle(["/", "\\", ".", "x", "+", "-", "|", ""])
+    color_map = {
+        cat: next(colors) for cat in categories
+    }
+    shape_map = {
+        cat: next(shapes) for cat in categories
+    }
+    print(color_map)
+    print(shape_map)
+    return color_map, shape_map
+
+def apply_global_patterns(fig, pattern_scheme):
+    """
+    Guarantees pattern mapping remains consistent across completely different plots,
+    matching categories by name rather than position.
+    """
+    # Extract Plotly's permanent structural IDs for this specific plot
+    ids = fig.data[0].ids
+    
+    # Safely match categories to your master dictionary
+    patterns_list = []
+    for sector_id in ids:
+        if sector_id == "root" or not sector_id:
+            patterns_list.append("")  # Background root gets no pattern
+        else:
+            category_name = sector_id.split("/")[-1]
+            patterns_list.append(pattern_scheme.get(category_name, ""))
+            
+    # Apply to the figure trace
+    fig.update_traces(
+        texttemplate="<span style='color: black; text-shadow: -2px -2px 0 #FFF, 2px -2px 0 #FFF, -2px 2px 0 #FFF, 2px 2px 0 #FFF, -2px 0 0 #FFF, 2px 0 0 #FFF, 0 -2px 0 #FFF, 0 2px 0 #FFF;'>%{label}</span>",
+        textposition="middle center",
+        marker=dict(
+            pattern=dict(
+                shape=patterns_list,
+                solidity=0.1,         # Subtle opacity so it doesn't overpower the colors
+                fgcolor="black",       # Forces pattern lines to be black
+                fillmode="overlay"     # FIX: Preserves the solid background color map
+            )
+        )
+    )
+    return fig
+
 if __name__ == "__main__":
+
+    #SUBJECTS_MAP = map_subjects_or_structures(collection, "subjects")
+        
     start_years = [2015, 2020, 2023]
 
     subjects_and_structures = pd.read_csv("subject_structure_map.csv", sep=";", quotechar='"', encoding="utf-8")
     
     collection = connect_to_db("mongodb://localhost:27017/",  "admin", "amsacta_documenti")
+    STRUCTURES_COLOR_MAP, STRUCTURES_PATTERN_MAP = map_subjects_or_structures(collection, type="structures", df_map=subjects_and_structures)
 
     types = get_types(collection)
     print(types)
-    types_plot, types_filename = plot_histogram(types, 2015, 2025)
-    grouped_types_plot, grouped_types_filename = plot_grouped_histogram(df=types)
-    datasets_plot, datasets_filename = plot_histogram(types, 2015, 2025, type_filter=["dataset", "software"], collapse_all=True)
-    grouped_datasets_plot, grouped_datasets_filename = plot_grouped_histogram(df=types, type_filter=["dataset", "software"], collapse_all=True)
+
+    TYPES_COLOR_MAP, TYPES_PATTERN_MAP = map_subjects_or_structures(collection, type="types")
+    
+    types_plot, types_filename = plot_histogram(types, 2015, 2025, color_map=TYPES_COLOR_MAP, pattern_map=TYPES_PATTERN_MAP)
+    grouped_types_plot, grouped_types_filename = plot_grouped_histogram(df=types,
+                                                                        color_map=TYPES_COLOR_MAP,
+                                                                        pattern_map=TYPES_PATTERN_MAP)
+    datasets_plot, datasets_filename = plot_histogram(types, 2015, 2025, 
+                                                      type_filter=["dataset", "software"],
+                                                      collapse_all=True,
+                                                      color_map=TYPES_COLOR_MAP,
+                                                      pattern_map=TYPES_PATTERN_MAP)
+    grouped_datasets_plot, grouped_datasets_filename = plot_grouped_histogram(df=types,
+                                                                              type_filter=["dataset", "software"],
+                                                                              collapse_all=True,
+                                                                              color_map=TYPES_COLOR_MAP,
+                                                                              pattern_map=TYPES_PATTERN_MAP)
     sizes = get_filesize(collection)
     sizes_plot, sizes_filename = plot_size_histogram(sizes, 2015, 2025)
     grouped_sizes_plot, grouped_sizes_filename = plot_group_sizes(df=sizes)
     related = get_related_id(collection)
     related = related.rename(columns={"has_relatedid": "type"})
     related["type"] = related["type"].map({True: "has relatedid", False: "no relatedid"})
-    related_plot, related_filename = plot_histogram(related, min_year=2017, max_year=2025, filename="relatedid")
-    grouped_related_plot, grouped_related_filename = plot_grouped_histogram(df=related, filename="relatedid")
+    RELATED_COLOR_MAP ={
+        "has relatedid": "#636EFA",
+        "no relatedid": "#636EFA"
+    }
+    RELATED_PATTERN_MAP ={
+            "has relatedid": "/",
+            "no relatedid": ""
+        }
+    related_plot, related_filename = plot_histogram(related,
+                                                    min_year=2017,
+                                                    max_year=2025,
+                                                    filename="relatedid",
+                                                    color_map=RELATED_COLOR_MAP,
+                                                    pattern_map=RELATED_PATTERN_MAP)
+    grouped_related_plot, grouped_related_filename = plot_grouped_histogram(df=related,
+                                                                            filename="relatedid",
+                                                                            color_map=RELATED_COLOR_MAP,
+                                                                            pattern_map=RELATED_PATTERN_MAP)
 
     with open("dashboard.html", "w") as f, open("report.md", "w") as r:
-        f.write("""
-                <html>
-                <head>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 40px;
-                        background-color: #f9f9f9;
-                    }
-                    h1 {
-                        font-size: 2em;
-                        color: #333;
-                        border-bottom: 2px solid #ccc;
-                        padding-bottom: 10px;
-                        margin-top: 40px;
-                    }
-                    h2 {
-                        font-size: 1.5em;
-                        color: #555;
-                        margin-top: 30px;
-                    }
-                </style>
-                </head>
-                <body>
-                """)
+    #     f.write("""
+    #             <html>
+    #             <head>
+    #             <style>
+    #                 body {
+    #                     font-family: Arial, sans-serif;
+    #                     margin: 40px;
+    #                     background-color: #f9f9f9;
+    #                 }
+    #                 h1 {
+    #                     font-size: 2em;
+    #                     color: #333;
+    #                     border-bottom: 2px solid #ccc;
+    #                     padding-bottom: 10px;
+    #                     margin-top: 40px;
+    #                 }
+    #                 h2 {
+    #                     font-size: 1.5em;
+    #                     color: #555;
+    #                     margin-top: 30px;
+    #                 }
+    #             </style>
+    #             </head>
+    #             <body>
+    #             """)
 
-        r.write("# Report AMS Acta\n")
+    #     r.write("# Report AMS Acta\n")
 
-        f.write("<h1>Documenti per tipologia</h1>")
+    #     f.write("<h1>Documenti per tipologia</h1>")
         r.write("\n## Documenti per tipologia\n")
-        f.write(types_plot.to_html(full_html=False, include_plotlyjs="cdn"))
-        f.write("Scarica il file CSV: <a href='" + types_filename + ".csv' download>Download CSV</a><br>")
+    #     f.write(types_plot.to_html(full_html=False, include_plotlyjs="cdn"))
+    #     f.write("Scarica il file CSV: <a href='" + types_filename + ".csv' download>Download CSV</a><br>")
         r.write(f"\n![Documenti per tipologia]({types_filename}.png)\n\nScarica il file CSV: [{types_filename}.csv]({types_filename}.csv)\n")
-        f.write(grouped_types_plot.to_html(full_html=False, include_plotlyjs="cdn"))
-        f.write("Scarica il file CSV: <a href='" + grouped_types_filename + ".csv' download>Download CSV</a><br>")
+    #     f.write(grouped_types_plot.to_html(full_html=False, include_plotlyjs="cdn"))
+    #     f.write("Scarica il file CSV: <a href='" + grouped_types_filename + ".csv' download>Download CSV</a><br>")
         r.write(f"\n![Documenti per tipologia]({grouped_types_filename}.png)\n\nScarica il file CSV: [{grouped_types_filename}.csv]({grouped_types_filename}.csv)\n")
-        f.write(datasets_plot.to_html(full_html=False, include_plotlyjs=False))
-        f.write("Scarica il file CSV: <a href='" + datasets_filename + ".csv' download>Download CSV</a><br>")
+    #     f.write(datasets_plot.to_html(full_html=False, include_plotlyjs=False))
+    #     f.write("Scarica il file CSV: <a href='" + datasets_filename + ".csv' download>Download CSV</a><br>")
         r.write(f"\n![Documenti per tipologia]({datasets_filename}.png)\n\nScarica il file CSV: [{datasets_filename}.csv]({datasets_filename}.csv)\n")
-        f.write(grouped_datasets_plot.to_html(full_html=False, include_plotlyjs=False))
-        f.write("Scarica il file CSV: <a href='" + grouped_datasets_filename + ".csv' download>Download CSV</a><br>")
+    #     f.write(grouped_datasets_plot.to_html(full_html=False, include_plotlyjs=False))
+    #     f.write("Scarica il file CSV: <a href='" + grouped_datasets_filename + ".csv' download>Download CSV</a><br>")
         r.write(f"\n![Documenti per tipologia]({grouped_datasets_filename}.png)\n\nScarica il file CSV: [{grouped_datasets_filename}.csv]({grouped_datasets_filename}.csv)\n")
-        f.write("<h1>Dataset con collegamento a pubblicazione</h1>")
+    #     f.write("<h1>Dataset con collegamento a pubblicazione</h1>")
         r.write("\n## Dataset con collegamento a pubblicazione\n")
-        f.write(related_plot.to_html(full_html=False, include_plotlyjs=False))
-        f.write("Scarica il file CSV: <a href='" + related_filename + ".csv' download>Download CSV</a><br>")
+    #     f.write(related_plot.to_html(full_html=False, include_plotlyjs=False))
+    #     f.write("Scarica il file CSV: <a href='" + related_filename + ".csv' download>Download CSV</a><br>")
         r.write(f"\n![Dataset con collegamento a pubblicazione]({related_filename}.png)\n\nScarica il file CSV: [{related_filename}.csv]({related_filename}.csv)\n")
-        f.write(grouped_related_plot.to_html(full_html=False, include_plotlyjs=False))
-        f.write("Scarica il file CSV: <a href='" + grouped_related_filename + ".csv' download>Download CSV</a><br>")
+    #     f.write(grouped_related_plot.to_html(full_html=False, include_plotlyjs=False))
+    #     f.write("Scarica il file CSV: <a href='" + grouped_related_filename + ".csv' download>Download CSV</a><br>")
         r.write(f"\n![Dataset con collegamento a pubblicazione]({grouped_related_filename}.png)\n\nScarica il file CSV: [{grouped_related_filename}.csv]({grouped_related_filename}.csv)\n")
-        f.write("<h1>Volume dei dataset</h1>")
+    #     f.write("<h1>Volume dei dataset</h1>")
         r.write("\n## Volume dei dataset\n")
-        f.write(sizes_plot.to_html(full_html=False, include_plotlyjs=False))
-        f.write("Scarica il file CSV: <a href='" + sizes_filename + ".csv' download>Download CSV</a><br>")
+    #     f.write(sizes_plot.to_html(full_html=False, include_plotlyjs=False))
+    #     f.write("Scarica il file CSV: <a href='" + sizes_filename + ".csv' download>Download CSV</a><br>")
         r.write(f"\n![Volume dei dataset]({sizes_filename}.png)\n\nScarica il file CSV: [{sizes_filename}.csv]({sizes_filename}.csv)\n")
-        f.write(grouped_sizes_plot.to_html(full_html=False, include_plotlyjs=False))
-        f.write("Scarica il file CSV: <a href='" + grouped_sizes_filename + ".csv' download>Download CSV</a><br>")
+    #     f.write(grouped_sizes_plot.to_html(full_html=False, include_plotlyjs=False))
+    #     f.write("Scarica il file CSV: <a href='" + grouped_sizes_filename + ".csv' download>Download CSV</a><br>")
         r.write(f"\n![Volume dei dataset]({grouped_sizes_filename}.png)\n\nScarica il file CSV: [{grouped_sizes_filename}.csv]({grouped_sizes_filename}.csv)\n")
 
-        f.write("<h1>Settori disciplinari (dataset e software)</h1>")
-        r.write("\n## Settori disciplinari\n")
-        for start_year in start_years:
-            end_year = start_year + 2 if start_year > 2015 else start_year + 4
-            subjects = get_subjects_or_structures(collection)
-            threshold = 5 if start_year > 2019 else 1
-            subjects_plot, subjects_filename = plot_subject_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
-            simple_subjects_plot, simple_subjects_filename = plot_simple_subject_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
-            f.write(subjects_plot.to_html(full_html=False, include_plotlyjs=False))
-            f.write("Scarica il file CSV: <a href='" + subjects_filename + ".csv' download>Download CSV</a><br>")
-            f.write(simple_subjects_plot.to_html(full_html=False, include_plotlyjs=False))
-            f.write("Scarica il file CSV: <a href='" + simple_subjects_filename + ".csv' download>Download CSV</a><br>")
-            r.write(f"\n![Settori disciplinari]({subjects_filename}.png)\n\nScarica il file CSV: [{subjects_filename}.csv]({subjects_filename}.csv)\n")
-            r.write(f"\n![Settori disciplinari (semplice)]({simple_subjects_filename}.png)\n\nScarica il file CSV: [{simple_subjects_filename}.csv]({simple_subjects_filename}.csv)\n")
+    #     f.write("<h1>Settori disciplinari (dataset e software)</h1>")
+    #     r.write("\n## Settori disciplinari\n")
+    #     for start_year in start_years:
+    #         end_year = start_year + 2 if start_year > 2015 else start_year + 4
+    #         subjects = get_subjects_or_structures(collection)
+    #         threshold = 5 if start_year > 2019 else 1
+    #         subjects_plot, subjects_filename = plot_subject_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
+    #         simple_subjects_plot, simple_subjects_filename = plot_simple_subject_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
+    #         f.write(subjects_plot.to_html(full_html=False, include_plotlyjs=False))
+    #         f.write("Scarica il file CSV: <a href='" + subjects_filename + ".csv' download>Download CSV</a><br>")
+    #         f.write(simple_subjects_plot.to_html(full_html=False, include_plotlyjs=False))
+    #         f.write("Scarica il file CSV: <a href='" + simple_subjects_filename + ".csv' download>Download CSV</a><br>")
+    #         r.write(f"\n![Settori disciplinari]({subjects_filename}.png)\n\nScarica il file CSV: [{subjects_filename}.csv]({subjects_filename}.csv)\n")
+    #         r.write(f"\n![Settori disciplinari (semplice)]({simple_subjects_filename}.png)\n\nScarica il file CSV: [{simple_subjects_filename}.csv]({simple_subjects_filename}.csv)\n")
 
-        f.write("<h1>Strutture (dataset e software)</h1>")
+    #     f.write("<h1>Strutture (dataset e software)</h1>")
         r.write("\n## Strutture\n")
         for start_year in start_years:
             end_year = start_year + 2 if start_year > 2015 else start_year + 4
@@ -637,41 +761,43 @@ if __name__ == "__main__":
                                               threshold=0, 
                                               min_year=start_year, 
                                               max_year=end_year,
-                                              df_map=subjects_and_structures)
-            f.write(structures_plot.to_html(full_html=False, include_plotlyjs=False))
+                                              df_map=subjects_and_structures,
+                                              color_scheme=STRUCTURES_COLOR_MAP,
+                                              pattern_scheme=STRUCTURES_PATTERN_MAP)
+    #        f.write(structures_plot.to_html(full_html=False, include_plotlyjs=False))
             f.write("Scarica il file CSV: <a href='" + structures_filename + ".csv' download>Download CSV</a><br>")
             r.write(f"\n![Strutture]({structures_filename}.png)\n\nScarica il file CSV: [{structures_filename}.csv]({structures_filename}.csv)\n")
 
-        f.write("<h1>Progetti (dataset e software)</h1>")
-        r.write("\n## Progetti\n")
-        for start_year in start_years:
-            param = "projectacronym"
-            end_year = start_year + 2 if start_year > 2015 else start_year + 4
-            projects = get_funding_info(collection, param, start_year, end_year, get_all=True)
-            projects_plot, projects_filename = plot_funding_treemap(projects, param, start_year, end_year)
-            f.write(projects_plot.to_html(full_html=False, include_plotlyjs=False))
-            f.write("Scarica il file CSV: <a href='" + projects_filename + ".csv' download>Download CSV</a><br>")
-            r.write(f"\n![Progetti]({projects_filename}.png)\n\nScarica il file CSV: [{projects_filename}.csv]({projects_filename}.csv)\n")
+    #     f.write("<h1>Progetti (dataset e software)</h1>")
+    #     r.write("\n## Progetti\n")
+    #     for start_year in start_years:
+    #         param = "projectacronym"
+    #         end_year = start_year + 2 if start_year > 2015 else start_year + 4
+    #         projects = get_funding_info(collection, param, start_year, end_year, get_all=True)
+    #         projects_plot, projects_filename = plot_funding_treemap(projects, param, start_year, end_year)
+    #         f.write(projects_plot.to_html(full_html=False, include_plotlyjs=False))
+    #         f.write("Scarica il file CSV: <a href='" + projects_filename + ".csv' download>Download CSV</a><br>")
+    #         r.write(f"\n![Progetti]({projects_filename}.png)\n\nScarica il file CSV: [{projects_filename}.csv]({projects_filename}.csv)\n")
 
-        f.write("<h1>Enti finanziatori (dataset e software)</h1>")
-        r.write("\n## Enti finanziatori\n")
-        for start_year in start_years:
-            end_year = start_year + 2 if start_year > 2015 else start_year + 4
-            funders = get_funding_info(collection, "funder", start_year, end_year, get_all=True)
-            funders_plot, funders_filename = plot_funding_treemap(funders, "funder", start_year, end_year)
-            f.write(funders_plot.to_html(full_html=False, include_plotlyjs=False))
-            f.write("Scarica il file CSV: <a href='" + funders_filename + ".csv' download>Download CSV</a><br>")
-            r.write(f"\n![Enti finanziatori]({funders_filename}.png)\n\nScarica il file CSV: [{funders_filename}.csv]({funders_filename}.csv)\n")
+    #     f.write("<h1>Enti finanziatori (dataset e software)</h1>")
+    #     r.write("\n## Enti finanziatori\n")
+    #     for start_year in start_years:
+    #         end_year = start_year + 2 if start_year > 2015 else start_year + 4
+    #         funders = get_funding_info(collection, "funder", start_year, end_year, get_all=True)
+    #         funders_plot, funders_filename = plot_funding_treemap(funders, "funder", start_year, end_year)
+    #         f.write(funders_plot.to_html(full_html=False, include_plotlyjs=False))
+    #         f.write("Scarica il file CSV: <a href='" + funders_filename + ".csv' download>Download CSV</a><br>")
+    #         r.write(f"\n![Enti finanziatori]({funders_filename}.png)\n\nScarica il file CSV: [{funders_filename}.csv]({funders_filename}.csv)\n")
 
-        f.write("<h1>Creatori (dataset e software)</h1>")
-        r.write("\n## Creatori\n")
-        for start_year in start_years:
-            top_n = 50
-            end_year = start_year + 2 if start_year > 2015 else start_year + 4
-            creators = get_creators(collection, start_year, end_year)
-            creators_plot, filename = plot_creators(creators, start_year, end_year, top_n=top_n)
-            f.write(creators_plot.to_html(full_html=False, include_plotlyjs=False))
-            f.write("Scarica il file CSV: <a href='" + filename + ".csv' download>Download CSV</a><br>")
-            r.write(f"\n![Creatori]({filename}.png)\n\nScarica il file CSV: [{filename}.csv]({filename}.csv)\n")
+    #     f.write("<h1>Creatori (dataset e software)</h1>")
+    #     r.write("\n## Creatori\n")
+    #     for start_year in start_years:
+    #         top_n = 50
+    #         end_year = start_year + 2 if start_year > 2015 else start_year + 4
+    #         creators = get_creators(collection, start_year, end_year)
+    #         creators_plot, filename = plot_creators(creators, start_year, end_year, top_n=top_n)
+    #         f.write(creators_plot.to_html(full_html=False, include_plotlyjs=False))
+    #         f.write("Scarica il file CSV: <a href='" + filename + ".csv' download>Download CSV</a><br>")
+    #         r.write(f"\n![Creatori]({filename}.png)\n\nScarica il file CSV: [{filename}.csv]({filename}.csv)\n")
 
-        f.write("</body></html>")
+    #     f.write("</body></html>")

@@ -1,4 +1,3 @@
-# Report AMS Acta
 
 ## Documenti per tipologia
 
@@ -38,32 +37,6 @@ Scarica il file CSV: [out/sizes_2015-2025.csv](out/sizes_2015-2025.csv)
 
 Scarica il file CSV: [out/sizes_2015-2019_2020-2022_2023-2025_.csv](out/sizes_2015-2019_2020-2022_2023-2025_.csv)
 
-## Settori disciplinari
-
-![Settori disciplinari](out/subject_2015-2019.png)
-
-Scarica il file CSV: [out/subject_2015-2019.csv](out/subject_2015-2019.csv)
-
-![Settori disciplinari (semplice)](out/simple_subject_2015-2019.png)
-
-Scarica il file CSV: [out/simple_subject_2015-2019.csv](out/simple_subject_2015-2019.csv)
-
-![Settori disciplinari](out/subject_2020-2022.png)
-
-Scarica il file CSV: [out/subject_2020-2022.csv](out/subject_2020-2022.csv)
-
-![Settori disciplinari (semplice)](out/simple_subject_2020-2022.png)
-
-Scarica il file CSV: [out/simple_subject_2020-2022.csv](out/simple_subject_2020-2022.csv)
-
-![Settori disciplinari](out/subject_2023-2025.png)
-
-Scarica il file CSV: [out/subject_2023-2025.csv](out/subject_2023-2025.csv)
-
-![Settori disciplinari (semplice)](out/simple_subject_2023-2025.png)
-
-Scarica il file CSV: [out/simple_subject_2023-2025.csv](out/simple_subject_2023-2025.csv)
-
 ## Strutture
 
 ![Strutture](out/structure_2015-2019.png)
@@ -77,45 +50,3 @@ Scarica il file CSV: [out/structure_2020-2022.csv](out/structure_2020-2022.csv)
 ![Strutture](out/structure_2023-2025.png)
 
 Scarica il file CSV: [out/structure_2023-2025.csv](out/structure_2023-2025.csv)
-
-## Progetti
-
-![Progetti](out/projectacronym_2015-2019.png)
-
-Scarica il file CSV: [out/projectacronym_2015-2019.csv](out/projectacronym_2015-2019.csv)
-
-![Progetti](out/projectacronym_2020-2022.png)
-
-Scarica il file CSV: [out/projectacronym_2020-2022.csv](out/projectacronym_2020-2022.csv)
-
-![Progetti](out/projectacronym_2023-2025.png)
-
-Scarica il file CSV: [out/projectacronym_2023-2025.csv](out/projectacronym_2023-2025.csv)
-
-## Enti finanziatori
-
-![Enti finanziatori](out/funder_2015-2019.png)
-
-Scarica il file CSV: [out/funder_2015-2019.csv](out/funder_2015-2019.csv)
-
-![Enti finanziatori](out/funder_2020-2022.png)
-
-Scarica il file CSV: [out/funder_2020-2022.csv](out/funder_2020-2022.csv)
-
-![Enti finanziatori](out/funder_2023-2025.png)
-
-Scarica il file CSV: [out/funder_2023-2025.csv](out/funder_2023-2025.csv)
-
-## Creatori
-
-![Creatori](out/top_50_creators_2015-2019.png)
-
-Scarica il file CSV: [out/top_50_creators_2015-2019.csv](out/top_50_creators_2015-2019.csv)
-
-![Creatori](out/top_50_creators_2020-2022.png)
-
-Scarica il file CSV: [out/top_50_creators_2020-2022.csv](out/top_50_creators_2020-2022.csv)
-
-![Creatori](out/top_50_creators_2023-2025.png)
-
-Scarica il file CSV: [out/top_50_creators_2023-2025.csv](out/top_50_creators_2023-2025.csv)
