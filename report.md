@@ -1,3 +1,4 @@
+# Report AMS Acta
 
 ## Documenti per tipologia
 
@@ -45,6 +46,20 @@ Scarica il file CSV: [out/median_dataset_size_2015-2025.csv](out/median_dataset_
 
 Scarica il file CSV: [out/median_dataset_size_None-None.csv](out/median_dataset_size_None-None.csv)
 
+## Settori disciplinari
+
+![Settori disciplinari](out/subject_2015-2019.png)
+
+Scarica il file CSV: [out/subject_2015-2019.csv](out/subject_2015-2019.csv)
+
+![Settori disciplinari](out/subject_2020-2022.png)
+
+Scarica il file CSV: [out/subject_2020-2022.csv](out/subject_2020-2022.csv)
+
+![Settori disciplinari](out/subject_2023-2025.png)
+
+Scarica il file CSV: [out/subject_2023-2025.csv](out/subject_2023-2025.csv)
+
 ## Strutture
 
 ![Strutture](out/structure_2015-2019.png)
@@ -58,3 +73,5 @@ Scarica il file CSV: [out/structure_2020-2022.csv](out/structure_2020-2022.csv)
 ![Strutture](out/structure_2023-2025.png)
 
 Scarica il file CSV: [out/structure_2023-2025.csv](out/structure_2023-2025.csv)
+
+## Progetti

@@ -399,7 +399,13 @@ def export_by_year(df, date_list=None):
     pivot.reset_index().to_csv("subjects.csv", index=False)
     return pivot
 
-def plot_subject_chart(df, param, threshold=0, start_year=None, end_year=None):
+def plot_subject_chart(df, param, 
+                       threshold=0, 
+                       start_year=None, 
+                       end_year=None, 
+                       color_map=None, 
+                       pattern_map=None):
+    
     date_list = range(start_year, end_year+1)
     df = df.loc[df["year"].isin(date_list)]
     df["macro_sector"] = df.apply(lambda row: row.subject.split("-")[0], axis=1)
@@ -415,13 +421,20 @@ def plot_subject_chart(df, param, threshold=0, start_year=None, end_year=None):
     df_clean.loc[df_clean["macro_sector"] == "other", "subject"] = "other"
     # remove subject is subject count is lesser than min
     df_clean["subject"] = [label if subjects_dict.get(label, 0) > threshold else "other" for label in df_clean["subject"]]
-    fig2 = px.sunburst(df_clean, path=["macro_sector", "subject"], values="count", title=f"Subjects Distribution, {start_year}-{end_year}")
+    fig = px.sunburst(df_clean, 
+                       path=["macro_sector", "subject"], 
+                       values="count", 
+                       title=f"Subjects Distribution, {start_year}-{end_year}",
+                       color="macro_sector",
+                       color_discrete_map=color_map
+            )
+    fig = apply_global_patterns(fig, pattern_map)
     #fig2.show()  # opens in browser
     filename = f"{OUT_DIR}/{param}_{start_year}-{end_year}"
     df_clean.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
-    fig2.write_image(f"{filename}.png")
+    fig.write_image(f"{filename}.png")
 
-    return fig2, filename
+    return fig, filename
 
 def plot_simple_subject_chart(df, param, threshold=0, start_year=None, end_year=None):
     df = df[df["year"].between(start_year, end_year)].copy()
@@ -703,8 +716,10 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
         df = get_types(collection)
     else:
         df = get_subjects_or_structures(collection, type)
+    
     if type == "subjects":
-        df["cat"] = df.apply(lambda row: row.df.split("-")[0], axis=1)
+        df["cat"] = df["subject"].str.split("-").str[0]
+
     elif df_map is not None:
         df = (df.merge(df_map, left_on="structure", right_on="subjectid", how="left")
                         .drop(columns=["subjectid", "structure"])
@@ -727,6 +742,13 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
     shape_map = {
         cat: next(shapes) for cat in categories
     }
+    if type == "subject":
+        ssd = sorted(df["subject"].unique())
+        ssd_shape_map = {
+            cat: shape_map[cat.split(" - ")] for cat in ssd
+        }
+        shape_map.update(ssd_shape_map)
+
     return color_map, shape_map
 
 def apply_global_patterns(fig, pattern_scheme):
@@ -749,7 +771,7 @@ def apply_global_patterns(fig, pattern_scheme):
     # Apply to the figure trace
     fig.update_traces(
         texttemplate="<span style='color: black; text-shadow: -2px -2px 0 #FFF, 2px -2px 0 #FFF, -2px 2px 0 #FFF, 2px 2px 0 #FFF, -2px 0 0 #FFF, 2px 0 0 #FFF, 0 -2px 0 #FFF, 0 2px 0 #FFF;'>%{label}</span>",
-        textposition="middle center",
+        #textposition="middle center",
         marker=dict(
             pattern=dict(
                 shape=patterns_list,
@@ -852,7 +874,7 @@ if __name__ == "__main__":
     #             <body>
     #             """)
 
-    #     r.write("# Report AMS Acta\n")
+        r.write("# Report AMS Acta\n")
 
     #     f.write("<h1>Documenti per tipologia</h1>")
         r.write("\n## Documenti per tipologia\n")
@@ -892,19 +914,26 @@ if __name__ == "__main__":
         
 
     #     f.write("<h1>Settori disciplinari (dataset e software)</h1>")
-    #     r.write("\n## Settori disciplinari\n")
-    #     for start_year in start_years:
-    #         end_year = start_year + 2 if start_year > 2015 else start_year + 4
-    #         subjects = get_subjects_or_structures(collection)
-    #         threshold = 5 if start_year > 2019 else 1
-    #         subjects_plot, subjects_filename = plot_subject_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
-    #         simple_subjects_plot, simple_subjects_filename = plot_simple_subject_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
+        r.write("\n## Settori disciplinari\n")
+        SUBJECTS_COLOR_MAP, SUBJECTS_PATTERN_MAP = map_subjects_or_structures(collection, type="subjects", df_map=subjects_and_structures)
+        for start_year in start_years:
+            end_year = start_year + 2 if start_year > 2015 else start_year + 4
+            subjects = get_subjects_or_structures(collection)
+            threshold = 5 if start_year > 2019 else 1
+            subjects_plot, subjects_filename = plot_subject_chart(df=subjects,
+                                                                  param="subject",
+                                                                  threshold=threshold,
+                                                                  start_year=start_year,
+                                                                  end_year=end_year,
+                                                                  color_map=SUBJECTS_COLOR_MAP,
+                                                                  pattern_map=SUBJECTS_PATTERN_MAP)
+            simple_subjects_plot, simple_subjects_filename = plot_simple_subject_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
     #         f.write(subjects_plot.to_html(full_html=False, include_plotlyjs=False))
     #         f.write("Scarica il file CSV: <a href='" + subjects_filename + ".csv' download>Download CSV</a><br>")
     #         f.write(simple_subjects_plot.to_html(full_html=False, include_plotlyjs=False))
     #         f.write("Scarica il file CSV: <a href='" + simple_subjects_filename + ".csv' download>Download CSV</a><br>")
-    #         r.write(f"\n![Settori disciplinari]({subjects_filename}.png)\n\nScarica il file CSV: [{subjects_filename}.csv]({subjects_filename}.csv)\n")
-    #         r.write(f"\n![Settori disciplinari (semplice)]({simple_subjects_filename}.png)\n\nScarica il file CSV: [{simple_subjects_filename}.csv]({simple_subjects_filename}.csv)\n")
+            r.write(f"\n![Settori disciplinari]({subjects_filename}.png)\n\nScarica il file CSV: [{subjects_filename}.csv]({subjects_filename}.csv)\n")
+    #        r.write(f"\n![Settori disciplinari (semplice)]({simple_subjects_filename}.png)\n\nScarica il file CSV: [{simple_subjects_filename}.csv]({simple_subjects_filename}.csv)\n")
 
     #     f.write("<h1>Strutture (dataset e software)</h1>")
         r.write("\n## Strutture\n")
@@ -920,11 +949,11 @@ if __name__ == "__main__":
                                               color_scheme=STRUCTURES_COLOR_MAP,
                                               pattern_scheme=STRUCTURES_PATTERN_MAP)
     #        f.write(structures_plot.to_html(full_html=False, include_plotlyjs=False))
-            f.write("Scarica il file CSV: <a href='" + structures_filename + ".csv' download>Download CSV</a><br>")
+    #        f.write("Scarica il file CSV: <a href='" + structures_filename + ".csv' download>Download CSV</a><br>")
             r.write(f"\n![Strutture]({structures_filename}.png)\n\nScarica il file CSV: [{structures_filename}.csv]({structures_filename}.csv)\n")
 
     #     f.write("<h1>Progetti (dataset e software)</h1>")
-    #     r.write("\n## Progetti\n")
+        r.write("\n## Progetti\n")
     #     for start_year in start_years:
     #         param = "projectacronym"
     #         end_year = start_year + 2 if start_year > 2015 else start_year + 4

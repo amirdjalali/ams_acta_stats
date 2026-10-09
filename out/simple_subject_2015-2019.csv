@@ -1,22 +1,10 @@
-<<<<<<< HEAD
-macro_sector
-AGR
-INF
-ING
-L
-M
-SECS
-SH3_10
-SPS
-other
-=======
 macro_sector,count
-AGR,6
+AGR,7
+INF,2
 ING,5
-L,3
-M,21
+L,6
+M,23
 SECS,14
 SH3_10,4
-SPS,2
-other,8
->>>>>>> 7b06e15ba2287f2970058076d7cd064a52b265c7
+SPS,3
+other,7
