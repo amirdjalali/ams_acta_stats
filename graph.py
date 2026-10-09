@@ -124,10 +124,118 @@ def get_filesize(collection):
 
     results = list(collection.aggregate(pipeline))
     df = pd.json_normalize(results).astype({
-        "_id": int,
+        "_id": "int64",
         "total_filesize": "int64"
     }).rename(columns={"_id": "year"}).sort_values("year", ascending=True)
     
+    return df
+
+def get_filesizes_per_dataset(collection):
+
+    pipeline = [
+       {
+            "$match": {
+                "type": "dataset",
+                "datestamp": { "$exists": True, "$ne": None }
+            }
+        },
+        {
+            "$unwind": "$documents"
+        },
+        {
+            "$unwind": "$documents.files"
+        },
+        {
+            "$group": {     # sums individual files per record
+                "_id": {
+                    "year": { "$year": { "$toDate": "$datestamp" } },
+                    "record": "$_id"
+                },
+                "total_filesize": { "$sum": "$documents.files.filesize" }
+            }
+        },
+        {
+            "$group": {     # calculates median across records per year
+                "_id": "$_id.year",
+                "median_dataset_size": { "$median": { "input": "$total_filesize", "method": "approximate" } }
+            }
+        },
+        {
+            "$sort": { "_id": 1 }
+        }
+    ]
+
+    results = list(collection.aggregate(pipeline))
+    df = pd.json_normalize(results).astype({
+        "_id": "int64",
+        "median_dataset_size": "int64"
+    }).rename(columns={"_id": "year"}).sort_values("year", ascending=True)
+    
+    return df
+
+def get_grouped_median_sizes(collection, bins=None):
+    if bins is None:
+        bins = [2015, 2020, 2023, 2026]
+    
+    branches = []
+    for i in range(len(bins) - 1):
+        branches.append({
+            "case": { "$and": [
+                { "$gte": ["$_id.year", bins[i]] },
+                { "$lt": ["$_id.year", bins[i+1]] }
+            ]},
+            "then": f"{bins[i]}-{bins[i+1]}"
+        })
+
+    pipeline = [
+        {
+            "$match": {
+                "type": "dataset",
+                "datestamp": { "$exists": True, "$ne": None }
+            }
+        },
+        {
+            "$unwind": "$documents"
+        },
+        {
+            "$unwind": "$documents.files"
+        },
+        {
+            "$group": {
+                "_id": {
+                    "year": { "$year": { "$toDate": "$datestamp" } },
+                    "record": "$_id"
+                },
+                "total_filesize": { "$sum": "$documents.files.filesize" }
+            }
+        },
+        {
+            "$addFields": {
+                "year_range": {
+                    "$switch": {
+                        "branches": branches,
+                        "default": "other"
+                    }
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": "$year_range",
+                "median_dataset_size": { "$median": { "input": "$total_filesize", "method": "approximate" } }
+            }
+        },
+        {
+            "$sort": { "_id": 1 }
+        }
+    ]
+
+    results = list(collection.aggregate(pipeline))
+    df = pd.json_normalize(results).astype({
+        "_id": str,
+        "median_dataset_size": "int64"
+    }).rename(columns={"_id": "year_range"}).sort_values("year_range", ascending=True)
+
     return df
 
 def get_funding_info(collection, param, start_year, end_year, get_all=False):
@@ -281,10 +389,6 @@ def get_related_id(collection):
     })
     return df
 
-    results = list(collection.aggregate(pipeline))
-    df = pd.json_normalize(results).rename(columns={"_id": "year"})
-    print(df)
-
 def export_by_year(df, date_list=None):
     pivot = df.pivot(
         index="_id.subject",
@@ -341,32 +445,43 @@ def plot_simple_subject_chart(df, param, threshold=0, start_year=None, end_year=
     fig.write_image(f"{filename}.png")
     return fig, filename
 
-def plot_size_histogram(df, min_year=None, max_year=None):
-    df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
-    df_filtered["total_filesize"] = df_filtered["total_filesize"] / (1024 ** 3)
+def plot_size_histogram(df, min_year=None, max_year=None, param="total_filesize", x_axis="year"):
+    if min_year and max_year:
+        df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
+    else:
+        df_filtered = df
+    if param == "total_filesize":
+        div = 3
+        unit = "GB"
+    else:
+        div = 2
+        unit = "MB"
+    df_filtered[param] = df_filtered[param] / (1024 ** div)
     fig = px.histogram(
         df_filtered,
-        x=df_filtered["year"].astype(str),
-        y="total_filesize",
-        title="Total Filesize by Year (GB, log scale)",
+        x=df_filtered[x_axis].astype(str),
+        y=param,
+        title=f"{param} by Year ({unit}, log scale)",
         log_y=True,
-        color_discrete_sequence=["#AB63FA"] 
+        color_discrete_sequence=["#AB63FA"],
+        pattern_shape_sequence=["x"],
+        text_auto=".1f"
     )
     fig.update_yaxes(
         title_text="",        # remove y axis label
         tickmode="array",
         tickvals=[.001, .01, .1, 1, 10, 100, 1000, 10000]
     )
-    filename = f"{OUT_DIR}/sizes_{min_year}-{max_year}"
+    filename = f"{OUT_DIR}/{param}_{min_year}-{max_year}"
     df_filtered.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
     fig.write_image(f"{filename}.png")
     return fig, filename
 
-def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026]):
+def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026], param="total_filesize"):
     bins = sorted(start_years)
     labels = [f"{s}-{e - 1}" for s, e in zip(bins[:-1], bins[1:])]
     df_filtered = df[(df["year"] >= bins[0]) & (df["year"] < bins[-1])].copy()
-    df_filtered["total_filesize"] = df_filtered["total_filesize"] / (1024 ** 3)  # bytes -> GB
+    df_filtered[param] = df_filtered[param] / (1024 ** 3)  # bytes -> GB
 
     df_filtered["year_range"] = pd.cut(    # labels the rows according to the bin values, excluding the right value
         df_filtered["year"], bins=bins, labels=labels, right=False
@@ -374,17 +489,19 @@ def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026]):
 
     df_grouped = (  # groups the values by year_range
         df_filtered
-        .groupby("year_range", observed=False, as_index=False)["total_filesize"]
+        .groupby("year_range", observed=False, as_index=False)[param]
         .sum()
     )
 
     fig = px.bar(
         df_grouped,
         x="year_range",
-        y="total_filesize",
-        title="Total Filesize by Year Range (GB, log scale)",
+        y=param,
+        title=f"{param} by Year Range (GB, log scale)",
         log_y=True,
-        color_discrete_sequence=["#AB63FA"] 
+        color_discrete_sequence=["#AB63FA"],
+        pattern_shape_sequence=["x"],
+        text_auto=".1f"
     )
     fig.update_xaxes(title_text="")
     fig.update_yaxes(
@@ -393,7 +510,7 @@ def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026]):
         tickvals=[.001, .01, .1, 1, 10, 100, 1000, 10000],
     )
 
-    filename = "sizes_"
+    filename = f"{param}_"
     for label in labels:
         filename += label + "_"
 
@@ -408,7 +525,9 @@ def plot_histogram(df, min_year=0,
                    filename="documents", 
                    collapse_all=True,
                    color_map=None,
-                   pattern_map=None):
+                   pattern_map=None,
+                   plot_order=[None],
+                   add_labels=False):
     df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
     filter_string = ""
     if type_filter:
@@ -422,14 +541,28 @@ def plot_histogram(df, min_year=0,
             df_filtered["type"] = type_filter[0]
     fig = px.bar(
         df_filtered,
-        x=df_filtered["year"].astype(str),
+        x=df_filtered["year"].astype(int).astype(str),
         y="count",
         color_discrete_map=color_map,
         pattern_shape_map=pattern_map,
         color="type",
         pattern_shape="type",
         title=f"Documents by Year, {min_year}-{max_year}" + (f" — {type_filter}" if type_filter else ""),
-        barmode="stack"
+        barmode="stack",
+        category_orders={"type": plot_order}
+        )
+
+    if add_labels:
+        totals = df_filtered.groupby("year")["count"].sum().reset_index().sort_values("year")
+        totals["type"] = "total"
+        
+        fig.add_scatter(
+            x=totals["year"].astype(int).astype(str),
+            y=totals["count"],
+            text=totals["count"],
+            mode="text",
+            textposition="top center",
+            showlegend=False
         )
     
     filename = f"{OUT_DIR}/{filename}_{min_year}-{max_year}" + (f"_{filter_string}" if filter_string else "")
@@ -443,7 +576,8 @@ def plot_grouped_histogram(df,
                            filename="documents",
                            collapse_all=True,
                            color_map=None,
-                           pattern_map=None):
+                           pattern_map=None,
+                           add_labels=False):
     labels = [f"{s}-{e - 1}" for s, e in zip(bins[:-1], bins[1:])]
     df_filtered = df[(df["year"] >= bins[0]) & (df["year"] < bins[-1])].copy()
     df_filtered["year_range"] = pd.cut(
@@ -465,8 +599,7 @@ def plot_grouped_histogram(df,
         if collapse_all:
             # relabel every selected type as the first one
             df_grouped["type"] = type_filter[0]
-
-    print(df_grouped)
+    
     fig = px.bar(
             df_grouped,
             x=df_grouped["year_range"].astype(str),
@@ -477,6 +610,18 @@ def plot_grouped_histogram(df,
             pattern_shape_map=pattern_map,
             title=f"Documents by Year" + (f" — {type_filter}" if type_filter else ""),
             barmode="stack"
+            )
+    if add_labels:
+        # calculate totals per year
+        totals = df_grouped.groupby("year_range")["count"].sum().reset_index().sort_values("year_range")
+        totals["type"] = "total"
+        fig.add_scatter(
+                x=totals["year_range"].astype(str),
+                y=totals["count"],
+                text=totals["count"],
+                mode="text",
+                textposition="top center",
+                showlegend=False
             )
 
     for label in labels:
@@ -520,7 +665,6 @@ def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=Non
                       .drop(columns=["subjectid", "structure"])
                       .rename(columns={"name": param}))
         df_grouped["structure"] = df_grouped["structure"].str.split(" - ").str[-1]
-        print(df_grouped)
     fig = px.treemap(
         df_grouped,
         path=[param],
@@ -559,21 +703,17 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
         df = get_types(collection)
     else:
         df = get_subjects_or_structures(collection, type)
-    print(df)
     if type == "subjects":
         df["cat"] = df.apply(lambda row: row.df.split("-")[0], axis=1)
     elif df_map is not None:
         df = (df.merge(df_map, left_on="structure", right_on="subjectid", how="left")
                         .drop(columns=["subjectid", "structure"])
             )
-        print(df)
         df["name"] = df["name"].str.split(" - ").str[-1]
         df = df.rename(columns={"name": "cat"})
     elif type == "types":
         df = df.rename(columns={"type": "cat"})
-    print(df)
     categories = sorted(df["cat"].unique())
-    print(categories)
     # px.colors.qualitative.Plotly
     # px.colors.qualitative.Set1
     # px.colors.qualitative.Pastel
@@ -587,8 +727,6 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
     shape_map = {
         cat: next(shapes) for cat in categories
     }
-    print(color_map)
-    print(shape_map)
     return color_map, shape_map
 
 def apply_global_patterns(fig, pattern_scheme):
@@ -635,7 +773,6 @@ if __name__ == "__main__":
     STRUCTURES_COLOR_MAP, STRUCTURES_PATTERN_MAP = map_subjects_or_structures(collection, type="structures", df_map=subjects_and_structures)
 
     types = get_types(collection)
-    print(types)
 
     TYPES_COLOR_MAP, TYPES_PATTERN_MAP = map_subjects_or_structures(collection, type="types")
     
@@ -654,8 +791,17 @@ if __name__ == "__main__":
                                                                               color_map=TYPES_COLOR_MAP,
                                                                               pattern_map=TYPES_PATTERN_MAP)
     sizes = get_filesize(collection)
-    sizes_plot, sizes_filename = plot_size_histogram(sizes, 2015, 2025)
+    sizes_plot, sizes_filename = plot_size_histogram(sizes, min_year=2015, max_year=2025)
     grouped_sizes_plot, grouped_sizes_filename = plot_group_sizes(df=sizes)
+    sizes_per_record = get_filesizes_per_dataset(collection)
+    size_per_record_plot, size_per_record_filename = plot_size_histogram(sizes_per_record, 
+                                                                         min_year=2015,
+                                                                         max_year=2025,
+                                                                         param="median_dataset_size")
+    grouped_median_sizes = get_grouped_median_sizes(collection)
+    grouped_median_sizes_plot, grouped_median_sizes_filename = plot_size_histogram(df=grouped_median_sizes,
+                                                                                   param="median_dataset_size",
+                                                                                   x_axis="year_range")
     related = get_related_id(collection)
     related = related.rename(columns={"has_relatedid": "type"})
     related["type"] = related["type"].map({True: "has relatedid", False: "no relatedid"})
@@ -672,7 +818,8 @@ if __name__ == "__main__":
                                                     max_year=2025,
                                                     filename="relatedid",
                                                     color_map=RELATED_COLOR_MAP,
-                                                    pattern_map=RELATED_PATTERN_MAP)
+                                                    pattern_map=RELATED_PATTERN_MAP,
+                                                    plot_order=["has relatedid", "no relatedid"])
     grouped_related_plot, grouped_related_filename = plot_grouped_histogram(df=related,
                                                                             filename="relatedid",
                                                                             color_map=RELATED_COLOR_MAP,
@@ -737,6 +884,12 @@ if __name__ == "__main__":
     #     f.write(grouped_sizes_plot.to_html(full_html=False, include_plotlyjs=False))
     #     f.write("Scarica il file CSV: <a href='" + grouped_sizes_filename + ".csv' download>Download CSV</a><br>")
         r.write(f"\n![Volume dei dataset]({grouped_sizes_filename}.png)\n\nScarica il file CSV: [{grouped_sizes_filename}.csv]({grouped_sizes_filename}.csv)\n")
+
+        r.write(f"\n![Volume dei dataset]({size_per_record_filename}.png)\n\nScarica il file CSV: [{size_per_record_filename}.csv]({size_per_record_filename}.csv)\n")
+
+        r.write(f"\n![Volume dei dataset]({grouped_median_sizes_filename}.png)\n\nScarica il file CSV: [{grouped_median_sizes_filename}.csv]({grouped_median_sizes_filename}.csv)\n")
+
+        
 
     #     f.write("<h1>Settori disciplinari (dataset e software)</h1>")
     #     r.write("\n## Settori disciplinari\n")

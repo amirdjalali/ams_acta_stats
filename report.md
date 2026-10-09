@@ -29,13 +29,21 @@ Scarica il file CSV: [out/relatedid_2015-2019_2020-2022_2023-2025.csv](out/relat
 
 ## Volume dei dataset
 
-![Volume dei dataset](out/sizes_2015-2025.png)
+![Volume dei dataset](out/total_filesize_2015-2025.png)
 
-Scarica il file CSV: [out/sizes_2015-2025.csv](out/sizes_2015-2025.csv)
+Scarica il file CSV: [out/total_filesize_2015-2025.csv](out/total_filesize_2015-2025.csv)
 
-![Volume dei dataset](out/sizes_2015-2019_2020-2022_2023-2025_.png)
+![Volume dei dataset](out/total_filesize_2015-2019_2020-2022_2023-2025_.png)
 
-Scarica il file CSV: [out/sizes_2015-2019_2020-2022_2023-2025_.csv](out/sizes_2015-2019_2020-2022_2023-2025_.csv)
+Scarica il file CSV: [out/total_filesize_2015-2019_2020-2022_2023-2025_.csv](out/total_filesize_2015-2019_2020-2022_2023-2025_.csv)
+
+![Volume dei dataset](out/median_dataset_size_2015-2025.png)
+
+Scarica il file CSV: [out/median_dataset_size_2015-2025.csv](out/median_dataset_size_2015-2025.csv)
+
+![Volume dei dataset](out/median_dataset_size_None-None.png)
+
+Scarica il file CSV: [out/median_dataset_size_None-None.csv](out/median_dataset_size_None-None.csv)
 
 ## Strutture
 
