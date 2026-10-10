@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -8,6 +9,7 @@ import plotly.io as pio
 from itertools import cycle
 
 OUT_DIR = "out"
+CACHE_DIR = "queries"
 
 def connect_to_db(client_url, db_name, collection_name):
 
@@ -18,249 +20,315 @@ def connect_to_db(client_url, db_name, collection_name):
 
 def get_subjects_or_structures(collection, type="subjects"):
     singular = type[:-1]
-    pipeline = [
-        {
-            "$match": {
-                "type": "dataset",
-                 "datestamp": { "$exists": True, "$ne": None }
-            }
-        },
-        {
-            "$addFields": {
-                type: {
-                    "$cond": {
-                        "if": { "$isArray": f"${type}" },
-                        "then": f"${type}",
-                        "else": { "$concatArrays": [[f"${type}"]] }
+    if os.path.exists(f"{CACHE_DIR}/{type}.csv"):
+        df = pd.read_csv(f"{CACHE_DIR}/{type}.csv", 
+                         encoding="utf-8",
+                         dtype={
+                             "year": int,
+                             "count": int,
+                             singular: str
+                         })
+        return df
+    else:
+        pipeline = [
+            {
+                "$match": {
+                    "type": "dataset",
+                    "datestamp": { "$exists": True, "$ne": None }
+                }
+            },
+            {
+                "$addFields": {
+                    type: {
+                        "$cond": {
+                            "if": { "$isArray": f"${type}" },
+                            "then": f"${type}",
+                            "else": { "$concatArrays": [[f"${type}"]] }
+                        }
                     }
                 }
-            }
-        },
-        { "$unwind": f"${type}" },
-        {
-            "$group": {
-                "_id": {
-                    "year": { "$year": { "$toDate": "$datestamp" } },
-                    singular: f"${type}"
-                },
-                "count": { "$sum": 1 }
-            }
-        },
-        { "$sort": { "count": -1 } }
-    ]
+            },
+            { "$unwind": f"${type}" },
+            {
+                "$group": {
+                    "_id": {
+                        "year": { "$year": { "$toDate": "$datestamp" } },
+                        singular: { "$toString": f"${type}" }
+                    },
+                    "count": { "$sum": 1 }
+                }
+            },
+            { "$sort": { "count": -1 } }
+        ]
 
-    results = list(collection.aggregate(pipeline))
-    df = pd.json_normalize(results).astype({
-        "count": int,
-        "_id.year": int,
-        f"_id.{singular}": str
-    }).rename(columns={f"_id.{singular}": singular, "_id.year": "year"})
-    
-    return df
+        results = list(collection.aggregate(pipeline))
+        print(results[0])
+        df = pd.json_normalize(results).astype({
+            "count": int,
+            "_id.year": int,
+            f"_id.{singular}": str
+        }).rename(columns={f"_id.{singular}": singular, "_id.year": "year"})
+        df.to_csv(f"{CACHE_DIR}/{type}.csv", index=False, encoding="utf-8")
+        return df
 
 def get_types(collection):
-    pipeline = [
-        {
-            "$match": {
-                "datestamp": { "$exists": True, "$ne": None },
-                "type": { "$exists": True, "$ne": None }
-            }
-        },
-        {
-            "$group": {
-                "_id": {
-                    "year": { "$year": { "$toDate": "$datestamp" } },
-                    "type": "$type"
-                },
-                "count": { "$sum": 1 }
-            }
-        },
-        {
-            "$sort": { "_id.year": 1, "count": -1 }
-        }
-    ]
 
-    results = list(collection.aggregate(pipeline))
-    df = pd.json_normalize(results).rename(columns={
-        "_id.year": "year",
-        "_id.type": "type"
-    })
+    if os.path.exists(f"{CACHE_DIR}/types.csv"):
+        df = pd.read_csv(f"{CACHE_DIR}/types.csv", encoding="utf-8")
+        return df
+    else:
+        pipeline = [
+            {
+                "$match": {
+                    "datestamp": { "$exists": True, "$ne": None },
+                    "type": { "$exists": True, "$ne": None }
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "year": { "$year": { "$toDate": "$datestamp" } },
+                        "type": "$type"
+                    },
+                    "count": { "$sum": 1 }
+                }
+            },
+            {
+                "$sort": { "_id.year": 1, "count": -1 }
+            }
+        ]
 
-    return df
+        results = list(collection.aggregate(pipeline))
+        df = pd.json_normalize(results).rename(columns={
+            "_id.year": "year",
+            "_id.type": "type"
+        })
+        df.to_csv(f"{CACHE_DIR}/types.csv", index=False, encoding="utf-8")
+
+        return df
 
 def get_filesize(collection):
-
-    pipeline = [
-        {
-            "$match": {
-                "type": "dataset",
-                "datestamp": { "$exists": True, "$ne": None }
-            }
-        },
-        {
-            "$unwind": "$documents"
-        },
-        {
-            "$unwind": "$documents.files"
-        },
-        {
-            "$group": {
-                "_id": {
-                    "$year": {
-                        "$toDate": "$datestamp"
+    if os.path.exists(f"{CACHE_DIR}/filesizes.csv"):
+        df = pd.read_csv(f"{CACHE_DIR}/filesizes.csv", encoding="utf-8")
+        return df
+    else:
+        pipeline = [
+            {
+                "$match": {
+                    "type": "dataset",
+                    "datestamp": { "$exists": True, "$ne": None }
+                }
+            },
+            {
+                "$unwind": "$documents"
+            },
+            {
+                "$unwind": "$documents.files"
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "$year": {
+                            "$toDate": "$datestamp"
+                        }
+                    },
+                    "total_filesize": {
+                        "$sum": "$documents.files.filesize"
                     }
-                },
-                "total_filesize": {
-                    "$sum": "$documents.files.filesize"
+                }
+            },
+            {
+                "$sort": {
+                    "_id": -1
                 }
             }
-        },
-        {
-            "$sort": {
-                "_id": -1
-            }
-        }
-    ]
+        ]
 
-    results = list(collection.aggregate(pipeline))
-    df = pd.json_normalize(results).astype({
-        "_id": "int64",
-        "total_filesize": "int64"
-    }).rename(columns={"_id": "year"}).sort_values("year", ascending=True)
-    
-    return df
+        results = list(collection.aggregate(pipeline))
+        df = pd.json_normalize(results).astype({
+            "_id": "int64",
+            "total_filesize": "int64"
+        }).rename(columns={"_id": "year"}).sort_values("year", ascending=True)
+        df.to_csv(f"{CACHE_DIR}/filesizes.csv", index=False, encoding="utf-8")
+        return df
 
 def get_filesizes_per_dataset(collection):
+    if os.path.exists(f"{CACHE_DIR}/median_dataset_sizes.csv"):
+        df = pd.read_csv(f"{CACHE_DIR}/median_dataset_sizes.csv", encoding="utf-8")
+        return df
+    else:
+        pipeline = [
+        {
+                "$match": {
+                    "type": "dataset",
+                    "datestamp": { "$exists": True, "$ne": None }
+                }
+            },
+            {
+                "$unwind": "$documents"
+            },
+            {
+                "$unwind": "$documents.files"
+            },
+            {
+                "$group": {     # sums individual files per record
+                    "_id": {
+                        "year": { "$year": { "$toDate": "$datestamp" } },
+                        "record": "$_id"
+                    },
+                    "total_filesize": { "$sum": "$documents.files.filesize" }
+                }
+            },
+            {
+                "$group": {     # calculates median across records per year
+                    "_id": "$_id.year",
+                    "median_dataset_size": { "$median": { "input": "$total_filesize", "method": "approximate" } }
+                }
+            },
+            {
+                "$sort": { "_id": 1 }
+            }
+        ]
 
-    pipeline = [
-       {
-            "$match": {
-                "type": "dataset",
-                "datestamp": { "$exists": True, "$ne": None }
-            }
-        },
-        {
-            "$unwind": "$documents"
-        },
-        {
-            "$unwind": "$documents.files"
-        },
-        {
-            "$group": {     # sums individual files per record
-                "_id": {
-                    "year": { "$year": { "$toDate": "$datestamp" } },
-                    "record": "$_id"
-                },
-                "total_filesize": { "$sum": "$documents.files.filesize" }
-            }
-        },
-        {
-            "$group": {     # calculates median across records per year
-                "_id": "$_id.year",
-                "median_dataset_size": { "$median": { "input": "$total_filesize", "method": "approximate" } }
-            }
-        },
-        {
-            "$sort": { "_id": 1 }
-        }
-    ]
-
-    results = list(collection.aggregate(pipeline))
-    df = pd.json_normalize(results).astype({
-        "_id": "int64",
-        "median_dataset_size": "int64"
-    }).rename(columns={"_id": "year"}).sort_values("year", ascending=True)
-    
-    return df
+        results = list(collection.aggregate(pipeline))
+        df = pd.json_normalize(results).astype({
+            "_id": "int64",
+            "median_dataset_size": "int64"
+        }).rename(columns={"_id": "year"}).sort_values("year", ascending=True)
+        df.to_csv(f"{CACHE_DIR}/median_dataset_sizes.csv", index=False, encoding="utf-8")
+        return df
 
 def get_grouped_median_sizes(collection, bins=None):
     if bins is None:
         bins = [2015, 2020, 2023, 2026]
-    
-    branches = []
-    for i in range(len(bins) - 1):
-        branches.append({
-            "case": { "$and": [
-                { "$gte": ["$_id.year", bins[i]] },
-                { "$lt": ["$_id.year", bins[i+1]] }
-            ]},
-            "then": f"{bins[i]}-{bins[i+1]}"
-        })
+    years = str(bins[0]) + "-"
+    for year in bins[1:]:
+        years += str(year -1) + "_" + str(year) + "-"
+    years = years[:-6]
+    if os.path.exists(f"{CACHE_DIR}/median_dataset_sizes_{years}.csv"):
+        df = pd.read_csv(f"{CACHE_DIR}/median_dataset_sizes_{years}.csv", encoding="utf-8")
+        return df
+    else:
+        branches = []
+        for i in range(len(bins) - 1):
+            branches.append({
+                "case": { "$and": [
+                    { "$gte": ["$_id.year", bins[i]] },
+                    { "$lt": ["$_id.year", bins[i+1]] }
+                ]},
+                "then": f"{bins[i]}-{bins[i+1]}"
+            })
 
-    pipeline = [
-        {
-            "$match": {
-                "type": "dataset",
-                "datestamp": { "$exists": True, "$ne": None }
-            }
-        },
-        {
-            "$unwind": "$documents"
-        },
-        {
-            "$unwind": "$documents.files"
-        },
-        {
-            "$group": {
-                "_id": {
-                    "year": { "$year": { "$toDate": "$datestamp" } },
-                    "record": "$_id"
-                },
-                "total_filesize": { "$sum": "$documents.files.filesize" }
-            }
-        },
-        {
-            "$addFields": {
-                "year_range": {
-                    "$switch": {
-                        "branches": branches,
-                        "default": "other"
+        pipeline = [
+            {
+                "$match": {
+                    "type": "dataset",
+                    "datestamp": { "$exists": True, "$ne": None }
+                }
+            },
+            {
+                "$unwind": "$documents"
+            },
+            {
+                "$unwind": "$documents.files"
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "year": { "$year": { "$toDate": "$datestamp" } },
+                        "record": "$_id"
+                    },
+                    "total_filesize": { "$sum": "$documents.files.filesize" }
+                }
+            },
+            {
+                "$addFields": {
+                    "year_range": {
+                        "$switch": {
+                            "branches": branches,
+                            "default": "other"
+                        }
                     }
                 }
+            },
+            {
+                "$group": {
+                    "_id": "$year_range",
+                    "median_dataset_size": { "$median": { "input": "$total_filesize", "method": "approximate" } }
+                }
+            },
+            {
+                "$sort": { "_id": 1 }
             }
-        },
-        {
-            "$group": {
-                "_id": "$year_range",
-                "median_dataset_size": { "$median": { "input": "$total_filesize", "method": "approximate" } }
-            }
-        },
-        {
-            "$sort": { "_id": 1 }
-        }
-    ]
+        ]
 
-    results = list(collection.aggregate(pipeline))
-    df = pd.json_normalize(results).astype({
-        "_id": str,
-        "median_dataset_size": "int64"
-    }).rename(columns={"_id": "year_range"}).sort_values("year_range", ascending=True)
-
-    return df
+        results = list(collection.aggregate(pipeline))
+        df = pd.json_normalize(results).astype({
+            "_id": str,
+            "median_dataset_size": "int64"
+        }).rename(columns={"_id": "year_range"}).sort_values("year_range", ascending=True)
+        df.to_csv(f"{CACHE_DIR}/median_dataset_sizes_{years}.csv", index=False, encoding="utf-8")
+        return df
 
 def get_funding_info(collection, param, start_year, end_year, get_all=False):
-    start_date=f"{start_year}-01-01"
-    end_date=f"{end_year+1}-01-01"
-    if get_all:
-        pipeline = [
+    if os.path.exists(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv"):
+        df = pd.read_csv(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv", encoding="utf-8")
+        return df
+    else:
+        start_date=f"{start_year}-01-01"
+        end_date=f"{end_year+1}-01-01"
+        if get_all:
+            pipeline = [
+                {
+                    "$match": {
+                        "datestamp": {
+                            "$gt": start_date,
+                            "$lt": end_date
+                        },
+                        "type": "dataset"
+                    }
+                },
+                {
+                    "$addFields": {
+                        param: {
+                            "$ifNull": [f"${param}", "None"]
+                        }
+                    }
+                },
+                {
+                    "$project": {
+                        param: 1,
+                        "_id": 0
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": f"${param}",
+                        "count": {
+                            "$sum": 1
+                        }
+                    }
+                },
+                {
+                    "$sort": {
+                        "count": -1
+                    }
+                }
+            ]
+        else:        
+            pipeline = [
             {
                 "$match": {
                     "datestamp": {
                         "$gt": start_date,
                         "$lt": end_date
                     },
-                    "type": "dataset"
+                    "type": "dataset",        
+                    param: { "$exists": True, "$ne": None }
                 }
             },
             {
-                "$addFields": {
-                    param: {
-                        "$ifNull": [f"${param}", "None"]
-                    }
-                }
-            },
-            {
-                "$project": {
+                "$project": { 
                     param: 1,
                     "_id": 0
                 }
@@ -279,125 +347,94 @@ def get_funding_info(collection, param, start_year, end_year, get_all=False):
                 }
             }
         ]
-    else:        
-        pipeline = [
-        {
-            "$match": {
-                "datestamp": {
-                    "$gt": start_date,
-                    "$lt": end_date
-                },
-                "type": "dataset",        
-                param: { "$exists": True, "$ne": None }
-            }
-        },
-        {
-            "$project": { 
-                param: 1,
-                "_id": 0
-            }
-        },
-        {
-            "$group": {
-                "_id": f"${param}",
-                "count": {
-                    "$sum": 1
-                }
-            }
-        },
-        {
-            "$sort": {
-                "count": -1
-            }
-        }
-    ]
 
-    results = list(collection.aggregate(pipeline))
-    df = pd.json_normalize(results).rename(columns={"_id": param})
-    return df
+        results = list(collection.aggregate(pipeline))
+        df = pd.json_normalize(results).rename(columns={"_id": param})
+        df.to_csv(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv", index=False, encoding="utf-8")
+        return df
 
 def get_creators(collection, start_year, end_year):
-    start_date=f"{start_year}-01-01"
-    end_date=f"{end_year+1}-01-01"
-    pipeline = [
-        {
-            "$match": {
-                "datestamp": {
-                    "$gt": start_date,
-                    "$lt": end_date
-                },
-                "type": "dataset",
-                "creators": { "$exists": True, "$ne": None }
+    if os.path.exists(f"{CACHE_DIR}/creators_{start_year}_{end_year}.csv"):
+        df = pd.read_csv(f"{CACHE_DIR}/creators_{start_year}_{end_year}.csv", encoding="utf-8")
+        return df
+    else:
+        start_date=f"{start_year}-01-01"
+        end_date=f"{end_year+1}-01-01"
+        pipeline = [
+            {
+                "$match": {
+                    "datestamp": {
+                        "$gt": start_date,
+                        "$lt": end_date
+                    },
+                    "type": "dataset",
+                    "creators": { "$exists": True, "$ne": None }
+                }
+            },
+            {
+                "$unwind": "$creators"
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "family": "$creators.name.family",
+                        "given": "$creators.name.given"
+                    },
+                    "count": { "$sum": 1 }
+                }
+            },
+            {
+                "$sort": { "count": -1 }
             }
-        },
-        {
-            "$unwind": "$creators"
-        },
-        {
-            "$group": {
-                "_id": {
-                    "family": "$creators.name.family",
-                    "given": "$creators.name.given"
-                },
-                "count": { "$sum": 1 }
-            }
-        },
-        {
-            "$sort": { "count": -1 }
-        }
-    ]
+        ]
 
-    results = list(collection.aggregate(pipeline))
-    df = pd.json_normalize(results).rename(columns={
-        "_id.family": "family",
-        "_id.given": "given"
-    })
-    return df
+        results = list(collection.aggregate(pipeline))
+        df = pd.json_normalize(results).rename(columns={
+            "_id.family": "family",
+            "_id.given": "given"
+        })
+        df.to_csv(f"{CACHE_DIR}/creators_{start_year}_{end_year}.csv", index=False, encoding="utf-8")
+        return df
 
 def get_related_id(collection):
-    pipeline = [
-        {
-            "$match": {
-                "type": "dataset",
-                "datestamp": { "$exists": True, "$ne": None }
-            }
-        },
-        {
-            "$group": {
-                "_id": {
-                    "year": { "$year": { "$toDate": "$datestamp" } },
-                    "has_relatedid": {
-                        "$cond": {
-                            "if": { "$gt": [{ "$size": { "$ifNull": ["$relatedid", []] } }, 0] },
-                            "then": True,
-                            "else": False
+    if os.path.exists(f"{CACHE_DIR}/related_ids.csv"):
+        df = pd.read_csv(f"{CACHE_DIR}/related_ids.csv", encoding="utf-8")
+        return df
+    else:
+        pipeline = [
+            {
+                "$match": {
+                    "type": "dataset",
+                    "datestamp": { "$exists": True, "$ne": None }
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "year": { "$year": { "$toDate": "$datestamp" } },
+                        "has_relatedid": {
+                            "$cond": {
+                                "if": { "$gt": [{ "$size": { "$ifNull": ["$relatedid", []] } }, 0] },
+                                "then": True,
+                                "else": False
+                            }
                         }
-                    }
-                },
-                "count": { "$sum": 1 }
+                    },
+                    "count": { "$sum": 1 }
+                }
+            },
+            {
+                "$sort": { "_id.year": 1 }
             }
-        },
-        {
-            "$sort": { "_id.year": 1 }
-        }
-    ]
+        ]
 
-    results = list(collection.aggregate(pipeline))
-    df = pd.json_normalize(results).rename(columns={
-        "_id.year": "year",
-        "_id.has_relatedid": "has_relatedid"
-    })
-    return df
-
-def export_by_year(df, date_list=None):
-    pivot = df.pivot(
-        index="_id.subject",
-        columns="_id.year",
-        values="count",
-    ).fillna(0).astype(int)
-    pivot = pivot[date_list] if date_list else pivot
-    pivot.reset_index().to_csv("subjects.csv", index=False)
-    return pivot
+        results = list(collection.aggregate(pipeline))
+        df = pd.json_normalize(results).rename(columns={
+            "_id.year": "year",
+            "_id.has_relatedid": "has_relatedid"
+        })
+        df.to_csv(f"{CACHE_DIR}/related_ids.csv", index=False, encoding="utf-8")
+        return df
 
 def plot_subject_chart(df, param, 
                        threshold=0, 
@@ -714,19 +751,20 @@ def plot_creators(df, min_year="", max_year="", top_n=100):
 def map_subjects_or_structures(collection, type="subjects", df_map=None):
     if type == "types":
         df = get_types(collection)
+    if type == "projectacronym":
+        df = get_funding_info(collection, param="projectacronym", start_year=2015, end_year=2025, get_all=True)
     else:
         df = get_subjects_or_structures(collection, type)
     
     if type == "subjects":
         df["cat"] = df["subject"].str.split("-").str[0]
-
     elif df_map is not None:
         df = (df.merge(df_map, left_on="structure", right_on="subjectid", how="left")
                         .drop(columns=["subjectid", "structure"])
-            )
+        )
         df["name"] = df["name"].str.split(" - ").str[-1]
         df = df.rename(columns={"name": "cat"})
-    elif type == "types":
+    elif type == "types" or type == "projectacronym":
         df = df.rename(columns={"type": "cat"})
     categories = sorted(df["cat"].unique())
     # px.colors.qualitative.Plotly
@@ -748,6 +786,14 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
             cat: shape_map[cat.split(" - ")] for cat in ssd
         }
         shape_map.update(ssd_shape_map)
+
+    color_map.update({
+        "other": "grey"
+    })
+
+    shape_map.update({
+        "other": ""
+    })
 
     return color_map, shape_map
 
@@ -789,10 +835,18 @@ if __name__ == "__main__":
         
     start_years = [2015, 2020, 2023]
 
-    subjects_and_structures = pd.read_csv("subject_structure_map.csv", sep=";", quotechar='"', encoding="utf-8")
+    subjects_and_structures = pd.read_csv("subject_structure_map.csv", 
+                                          sep=";",
+                                          quotechar='"', 
+                                          encoding="utf-8",
+                                          dtype={
+                                              "subjectid": "str",
+                                              "name": "str"
+                                          })
     
     collection = connect_to_db("mongodb://localhost:27017/",  "admin", "amsacta_documenti")
     STRUCTURES_COLOR_MAP, STRUCTURES_PATTERN_MAP = map_subjects_or_structures(collection, type="structures", df_map=subjects_and_structures)
+    PROJECTS_COLOR_MAP, PROJECTS_PATTERN_MAP = map_subjects_or_structures(collection, type="projectacronym")
 
     types = get_types(collection)
 
@@ -936,7 +990,7 @@ if __name__ == "__main__":
     #        r.write(f"\n![Settori disciplinari (semplice)]({simple_subjects_filename}.png)\n\nScarica il file CSV: [{simple_subjects_filename}.csv]({simple_subjects_filename}.csv)\n")
 
     #     f.write("<h1>Strutture (dataset e software)</h1>")
-        r.write("\n## Strutture\n")
+        r.write("\n## Strutture (dataset e software)\n")
         for start_year in start_years:
             end_year = start_year + 2 if start_year > 2015 else start_year + 4
             structures = get_subjects_or_structures(collection, type="structures")
@@ -954,14 +1008,14 @@ if __name__ == "__main__":
 
     #     f.write("<h1>Progetti (dataset e software)</h1>")
         r.write("\n## Progetti\n")
-    #     for start_year in start_years:
-    #         param = "projectacronym"
-    #         end_year = start_year + 2 if start_year > 2015 else start_year + 4
-    #         projects = get_funding_info(collection, param, start_year, end_year, get_all=True)
-    #         projects_plot, projects_filename = plot_funding_treemap(projects, param, start_year, end_year)
+        for start_year in start_years:
+            param = "projectacronym"
+            end_year = start_year + 2 if start_year > 2015 else start_year + 4
+            projects = get_funding_info(collection, param, start_year, end_year, get_all=True)
+            projects_plot, projects_filename = plot_funding_treemap(projects, param, start_year, end_year)
     #         f.write(projects_plot.to_html(full_html=False, include_plotlyjs=False))
     #         f.write("Scarica il file CSV: <a href='" + projects_filename + ".csv' download>Download CSV</a><br>")
-    #         r.write(f"\n![Progetti]({projects_filename}.png)\n\nScarica il file CSV: [{projects_filename}.csv]({projects_filename}.csv)\n")
+            r.write(f"\n![Progetti]({projects_filename}.png)\n\nScarica il file CSV: [{projects_filename}.csv]({projects_filename}.csv)\n")
 
     #     f.write("<h1>Enti finanziatori (dataset e software)</h1>")
     #     r.write("\n## Enti finanziatori\n")
