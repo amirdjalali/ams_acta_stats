@@ -95,8 +95,8 @@ count,year,type
 1,2021,software
 98,2022,monograph
 56,2022,dataset
-10,2022,conference_item
 10,2022,book_section
+10,2022,conference_item
 9,2022,preprint
 1,2022,software
 72,2023,monograph
@@ -122,5 +122,5 @@ count,year,type
 10,2026,book_section
 8,2026,preprint
 2,2026,conference_item
-1,2026,software
 1,2026,working_paper
+1,2026,software

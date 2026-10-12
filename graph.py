@@ -9,10 +9,20 @@ import plotly.io as pio
 from itertools import cycle
 
 OUT_DIR = "out"
+CSV_DIR = "csv"
+PNG_DIR = "png"
+SVG_DIR = "svg"
+PNG_PATH = f"{OUT_DIR}/{PNG_DIR}"
+SVG_PATH = f"{OUT_DIR}/{SVG_DIR}"
+CSV_PATH = f"{OUT_DIR}/{CSV_DIR}"
+DEFAULT_SCALE = 2
 CACHE_DIR = "queries"
+USE_CACHED_IMG = False
+SAVE_SVG = True
+SAVE_PNG = False
 
 def connect_to_db(client_url, db_name, collection_name):
-
+    print("Connecting to MongoDB...")
     client = MongoClient()  # or your Atlas connection string
     db = client["admin"]
     collection = db["amsacta_documenti"]
@@ -21,6 +31,7 @@ def connect_to_db(client_url, db_name, collection_name):
 def get_subjects_or_structures(collection, type="subjects"):
     singular = type[:-1]
     if os.path.exists(f"{CACHE_DIR}/{type}.csv"):
+        print(f"Loading cached {type} data...")
         df = pd.read_csv(f"{CACHE_DIR}/{type}.csv", 
                          encoding="utf-8",
                          dtype={
@@ -30,10 +41,11 @@ def get_subjects_or_structures(collection, type="subjects"):
                          })
         return df
     else:
+        print(f"Querying {type} data from MongoDB...")
         pipeline = [
             {
                 "$match": {
-                    "type": "dataset",
+                     "type": { "$in": ["dataset", "software"] },
                     "datestamp": { "$exists": True, "$ne": None }
                 }
             },
@@ -62,7 +74,6 @@ def get_subjects_or_structures(collection, type="subjects"):
         ]
 
         results = list(collection.aggregate(pipeline))
-        print(results[0])
         df = pd.json_normalize(results).astype({
             "count": int,
             "_id.year": int,
@@ -72,11 +83,12 @@ def get_subjects_or_structures(collection, type="subjects"):
         return df
 
 def get_types(collection):
-
     if os.path.exists(f"{CACHE_DIR}/types.csv"):
+        print("Loading cached types data...")
         df = pd.read_csv(f"{CACHE_DIR}/types.csv", encoding="utf-8")
         return df
     else:
+        print("Querying types data from MongoDB...")
         pipeline = [
             {
                 "$match": {
@@ -109,13 +121,15 @@ def get_types(collection):
 
 def get_filesize(collection):
     if os.path.exists(f"{CACHE_DIR}/filesizes.csv"):
+        print("Loading cached filesizes data...")
         df = pd.read_csv(f"{CACHE_DIR}/filesizes.csv", encoding="utf-8")
         return df
     else:
+        print("Querying filesizes data from MongoDB...")
         pipeline = [
             {
                 "$match": {
-                    "type": "dataset",
+                    "type": { "$in": ["dataset", "software"] },
                     "datestamp": { "$exists": True, "$ne": None }
                 }
             },
@@ -154,13 +168,15 @@ def get_filesize(collection):
 
 def get_filesizes_per_dataset(collection):
     if os.path.exists(f"{CACHE_DIR}/median_dataset_sizes.csv"):
+        print("Loading cached median dataset sizes data...")
         df = pd.read_csv(f"{CACHE_DIR}/median_dataset_sizes.csv", encoding="utf-8")
         return df
     else:
+        print("Querying median dataset sizes data from MongoDB...")
         pipeline = [
         {
                 "$match": {
-                    "type": "dataset",
+                    "type": { "$in": ["dataset", "software"] },
                     "datestamp": { "$exists": True, "$ne": None }
                 }
             },
@@ -196,6 +212,44 @@ def get_filesizes_per_dataset(collection):
             "median_dataset_size": "int64"
         }).rename(columns={"_id": "year"}).sort_values("year", ascending=True)
         df.to_csv(f"{CACHE_DIR}/median_dataset_sizes.csv", index=False, encoding="utf-8")
+
+        pipeline_check2 = [
+            {
+                "$match": {
+                    "type": "dataset",
+                    "datestamp": { "$exists": True, "$ne": None }
+                }
+            },
+            {
+                "$unwind": "$documents"
+            },
+            {
+                "$unwind": "$documents.files"
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "year": { "$year": { "$toDate": "$datestamp" } },
+                        "record": "$_id"
+                    },
+                    "total_filesize": { "$sum": "$documents.files.filesize" }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id.year",
+                    "median": { "$median": { "input": "$total_filesize", "method": "approximate" } },
+                    "avg": { "$avg": "$total_filesize" },
+                    "min": { "$min": "$total_filesize" },
+                    "max": { "$max": "$total_filesize" },
+                    "count": { "$sum": 1 }
+                }
+            },
+            { "$sort": { "_id": 1 } }
+        ]
+
+        print(list(collection.aggregate(pipeline_check2)))
+
         return df
 
 def get_grouped_median_sizes(collection, bins=None):
@@ -206,9 +260,11 @@ def get_grouped_median_sizes(collection, bins=None):
         years += str(year -1) + "_" + str(year) + "-"
     years = years[:-6]
     if os.path.exists(f"{CACHE_DIR}/median_dataset_sizes_{years}.csv"):
+        print(f"Loading cached grouped median dataset sizes data for {years}...")
         df = pd.read_csv(f"{CACHE_DIR}/median_dataset_sizes_{years}.csv", encoding="utf-8")
         return df
     else:
+        print(f"Querying grouped median dataset sizes data for {years}...")
         branches = []
         for i in range(len(bins) - 1):
             branches.append({
@@ -222,7 +278,7 @@ def get_grouped_median_sizes(collection, bins=None):
         pipeline = [
             {
                 "$match": {
-                    "type": "dataset",
+                    "type": { "$in": ["dataset", "software"] },
                     "datestamp": { "$exists": True, "$ne": None }
                 }
             },
@@ -272,9 +328,11 @@ def get_grouped_median_sizes(collection, bins=None):
 
 def get_funding_info(collection, param, start_year, end_year, get_all=False):
     if os.path.exists(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv"):
+        print(f"Loading cached funding info data for {param}, {start_year}-{end_year}...")
         df = pd.read_csv(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv", encoding="utf-8")
         return df
     else:
+        print(f"Querying funding info data for {param}, {start_year}-{end_year}...")
         start_date=f"{start_year}-01-01"
         end_date=f"{end_year+1}-01-01"
         if get_all:
@@ -285,7 +343,7 @@ def get_funding_info(collection, param, start_year, end_year, get_all=False):
                             "$gt": start_date,
                             "$lt": end_date
                         },
-                        "type": "dataset"
+                        "type": { "$in": ["dataset", "software"] }
                     }
                 },
                 {
@@ -323,7 +381,7 @@ def get_funding_info(collection, param, start_year, end_year, get_all=False):
                         "$gt": start_date,
                         "$lt": end_date
                     },
-                    "type": "dataset",        
+                    "type": { "$in": ["dataset", "software"] },
                     param: { "$exists": True, "$ne": None }
                 }
             },
@@ -355,9 +413,11 @@ def get_funding_info(collection, param, start_year, end_year, get_all=False):
 
 def get_creators(collection, start_year, end_year):
     if os.path.exists(f"{CACHE_DIR}/creators_{start_year}_{end_year}.csv"):
+        print(f"Loading cached creators data for {start_year}-{end_year}...")
         df = pd.read_csv(f"{CACHE_DIR}/creators_{start_year}_{end_year}.csv", encoding="utf-8")
         return df
     else:
+        print(f"Querying creators data for {start_year}-{end_year}...")
         start_date=f"{start_year}-01-01"
         end_date=f"{end_year+1}-01-01"
         pipeline = [
@@ -367,7 +427,7 @@ def get_creators(collection, start_year, end_year):
                         "$gt": start_date,
                         "$lt": end_date
                     },
-                    "type": "dataset",
+                    "type": { "$in": ["dataset", "software"] },
                     "creators": { "$exists": True, "$ne": None }
                 }
             },
@@ -398,13 +458,15 @@ def get_creators(collection, start_year, end_year):
 
 def get_related_id(collection):
     if os.path.exists(f"{CACHE_DIR}/related_ids.csv"):
+        print("Loading cached related IDs data...")
         df = pd.read_csv(f"{CACHE_DIR}/related_ids.csv", encoding="utf-8")
         return df
     else:
+        print("Querying related IDs data from MongoDB...")
         pipeline = [
             {
                 "$match": {
-                    "type": "dataset",
+                    "type": { "$in": ["dataset", "software"] },
                     "datestamp": { "$exists": True, "$ne": None }
                 }
             },
@@ -436,13 +498,23 @@ def get_related_id(collection):
         df.to_csv(f"{CACHE_DIR}/related_ids.csv", index=False, encoding="utf-8")
         return df
 
+def save_figure(fig, filename, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, use_cached=USE_CACHED_IMG):
+    if use_cached:
+        return True
+    if png:
+        print(f"Saving figure {filename} in PNG format...")
+        fig.write_image(f"{OUT_DIR}/{PNG_DIR}/{filename}.png", scale=scale)
+    if svg:
+        print(f"Saving figure {filename} in SVG format...")
+        fig.write_image(f"{OUT_DIR}/{SVG_DIR}/{filename}.svg")
+
 def plot_subject_chart(df, param, 
                        threshold=0, 
                        start_year=None, 
                        end_year=None, 
                        color_map=None, 
                        pattern_map=None):
-    
+    print(f"Plotting subject chart for {param}, {start_year}-{end_year}...")
     date_list = range(start_year, end_year+1)
     df = df.loc[df["year"].isin(date_list)]
     df["macro_sector"] = df.apply(lambda row: row.subject.split("-")[0], axis=1)
@@ -467,13 +539,13 @@ def plot_subject_chart(df, param,
             )
     fig = apply_global_patterns(fig, pattern_map)
     #fig2.show()  # opens in browser
-    filename = f"{OUT_DIR}/{param}_{start_year}-{end_year}"
-    df_clean.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
-    fig.write_image(f"{filename}.png")
-
+    filename = f"{param}_{start_year}-{end_year}"
+    df_clean.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
+    save_figure(fig, filename)
     return fig, filename
 
 def plot_simple_subject_chart(df, param, threshold=0, start_year=None, end_year=None):
+    print(f"Plotting simple subject chart for {param}, {start_year}-{end_year}...")
     df = df[df["year"].between(start_year, end_year)].copy()
     df["macro_sector"] = df["subject"].str.split("-").str[0]
 
@@ -490,12 +562,13 @@ def plot_simple_subject_chart(df, param, threshold=0, start_year=None, end_year=
         title=f"Macro Sectors Distribution, {start_year}-{end_year}",
     )
 
-    filename = f"{OUT_DIR}/simple_{param}_{start_year}-{end_year}"
-    counts[["macro_sector", "count"]].to_csv(f"{filename}.csv", index=False, encoding="utf-8")
-    fig.write_image(f"{filename}.png")
+    filename = f"simple_{param}_{start_year}-{end_year}"
+    counts[["macro_sector", "count"]].to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
+    save_figure(fig, filename)
     return fig, filename
 
-def plot_size_histogram(df, min_year=None, max_year=None, param="total_filesize", x_axis="year"):
+def plot_size_histogram(df, min_year=None, max_year=None, param="total_filesize", x_axis="year", log_scale=True):
+    print(f"Plotting size histogram for {param}, {min_year}-{max_year}...")
     if min_year and max_year:
         df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
     else:
@@ -511,25 +584,31 @@ def plot_size_histogram(df, min_year=None, max_year=None, param="total_filesize"
         df_filtered,
         x=df_filtered[x_axis].astype(str),
         y=param,
-        title=f"{param} by Year ({unit}, log scale)",
-        log_y=True,
+        title=f"{param} by Year ({unit})",
+        log_y=log_scale,
         color_discrete_sequence=["#AB63FA"],
         pattern_shape_sequence=["x"],
         text_auto=".1f"
     )
-    fig.update_yaxes(
-        title_text="",        # remove y axis label
-        tickmode="array",
-        tickvals=[.001, .01, .1, 1, 10, 100, 1000, 10000]
-    )
-    filename = f"{OUT_DIR}/{param}_{min_year}-{max_year}"
-    df_filtered.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
-    fig.write_image(f"{filename}.png")
+    if log_scale:
+        fig.update_layout(title=f"{param} by Year ({unit}, log scale)")
+        fig.update_yaxes(
+            title_text="",        # remove y axis label
+            tickmode="array",
+            tickvals=[.001, .01, .1, 1, 10, 100, 1000, 10000]
+        )
+    else:
+        fig.update_xaxes(title_text=None)
+        fig.update_yaxes(title_text=None)
+    filename = f"{param}_{min_year}-{max_year}"
+    df_filtered.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
+    save_figure(fig, filename)
     return fig, filename
 
 def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026], param="total_filesize"):
     bins = sorted(start_years)
     labels = [f"{s}-{e - 1}" for s, e in zip(bins[:-1], bins[1:])]
+    print(f"Plotting grouped sizes for {labels}...")
     df_filtered = df[(df["year"] >= bins[0]) & (df["year"] < bins[-1])].copy()
     df_filtered[param] = df_filtered[param] / (1024 ** 3)  # bytes -> GB
 
@@ -553,7 +632,7 @@ def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026], param="total_file
         pattern_shape_sequence=["x"],
         text_auto=".1f"
     )
-    fig.update_xaxes(title_text="")
+    fig.update_xaxes(title_text=None)
     fig.update_yaxes(
         title_text="",
         tickmode="array",
@@ -563,23 +642,25 @@ def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026], param="total_file
     filename = f"{param}_"
     for label in labels:
         filename += label + "_"
-
-    filename = f"{OUT_DIR}/{filename}"
-    df_grouped.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
-    fig.write_image(f"{filename}.png")
+    df_grouped.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
+    save_figure(fig, filename)
     return fig, filename
 
 def plot_histogram(df, min_year=0, 
                    max_year=9999, 
                    type_filter=None, 
-                   filename="documents", 
+                   filename="documents",
+                   param="count",
                    collapse_all=True,
                    color_map=None,
                    pattern_map=None,
                    plot_order=[None],
                    add_labels=False):
+    
+    print(f"Plotting {filename} histogram for {min_year}-{max_year}...")
     df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
     filter_string = ""
+    type_name = ""
     if type_filter:
         if isinstance(type_filter, str):
             type_filter = [type_filter]
@@ -588,36 +669,46 @@ def plot_histogram(df, min_year=0,
         df_filtered = df_filtered[df_filtered["type"].isin(type_filter)]
         if collapse_all:
             # relabel every selected type as the first one
-            df_filtered["type"] = type_filter[0]
+            type_name = type_filter[0]
+            for name in type_filter[1:]:
+                type_name += " and " + name
+            df_filtered["type"] = type_name
+            if color_map:
+                color_map[type_name] = color_map.get(type_filter[0])
+            if pattern_map:
+                pattern_map[type_name] = pattern_map.get(type_filter[0])
     fig = px.bar(
         df_filtered,
         x=df_filtered["year"].astype(int).astype(str),
-        y="count",
+        y=param,
         color_discrete_map=color_map,
         pattern_shape_map=pattern_map,
         color="type",
         pattern_shape="type",
-        title=f"Documents by Year, {min_year}-{max_year}" + (f" — {type_filter}" if type_filter else ""),
+        title=f"Documents by Year, {min_year}-{max_year}" + (f" — {type_name}" if type_name else ""),
         barmode="stack",
         category_orders={"type": plot_order}
         )
 
     if add_labels:
-        totals = df_filtered.groupby("year")["count"].sum().reset_index().sort_values("year")
+        totals = df_filtered.groupby("year")[param].sum().reset_index().sort_values("year")
         totals["type"] = "total"
         
         fig.add_scatter(
             x=totals["year"].astype(int).astype(str),
-            y=totals["count"],
-            text=totals["count"],
+            y=totals[param],
+            text=totals[param],
             mode="text",
             textposition="top center",
             showlegend=False
         )
+
+    fig.update_xaxes(title_text=None)
+    fig.update_yaxes(range=[0, None])
     
-    filename = f"{OUT_DIR}/{filename}_{min_year}-{max_year}" + (f"_{filter_string}" if filter_string else "")
-    df_filtered.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
-    fig.write_image(f"{filename}.png")
+    filename = f"{filename}_{min_year}-{max_year}" + (f"_{filter_string}" if filter_string else "")
+    df_filtered.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
+    save_figure(fig, filename)
     return fig, filename
 
 def plot_grouped_histogram(df, 
@@ -629,6 +720,7 @@ def plot_grouped_histogram(df,
                            pattern_map=None,
                            add_labels=False):
     labels = [f"{s}-{e - 1}" for s, e in zip(bins[:-1], bins[1:])]
+    print(f"Plotting grouped histogram for {labels}...")
     df_filtered = df[(df["year"] >= bins[0]) & (df["year"] < bins[-1])].copy()
     df_filtered["year_range"] = pd.cut(
         df_filtered["year"], bins=bins, labels=labels, right=False
@@ -640,6 +732,7 @@ def plot_grouped_histogram(df,
         .sum()
     )
     filter_string = ""
+    type_name = ""
     if type_filter:
         if isinstance(type_filter, str):
             type_filter = [type_filter]
@@ -648,7 +741,14 @@ def plot_grouped_histogram(df,
         df_grouped = df_grouped[df_grouped["type"].isin(type_filter)]
         if collapse_all:
             # relabel every selected type as the first one
-            df_grouped["type"] = type_filter[0]
+            type_name = type_filter[0]
+            for name in type_filter[1:]:
+                type_name += " and " + name
+            df_grouped["type"] = type_name
+            if color_map:
+                color_map[type_name] = color_map.get(type_filter[0])
+            if pattern_map:
+                pattern_map[type_name] = pattern_map.get(type_filter[0])
     
     fig = px.bar(
             df_grouped,
@@ -658,9 +758,10 @@ def plot_grouped_histogram(df,
             pattern_shape="type",
             color_discrete_map=color_map,
             pattern_shape_map=pattern_map,
-            title=f"Documents by Year" + (f" — {type_filter}" if type_filter else ""),
+            title=f"Documents by Year" + (f" — {type_name}" if type_name else ""),
             barmode="stack"
             )
+    
     if add_labels:
         # calculate totals per year
         totals = df_grouped.groupby("year_range")["count"].sum().reset_index().sort_values("year_range")
@@ -674,17 +775,19 @@ def plot_grouped_histogram(df,
                 showlegend=False
             )
 
+    fig.update_xaxes(title_text=None)
+
     for label in labels:
         filename += "_" + label
     filename += (f"_{filter_string}" if filter_string else "")
-
-    filename = f"{OUT_DIR}/{filename}"
-    df_grouped.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
-    fig.write_image(f"{filename}.png")
+    df_grouped.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
+    save_figure(fig, filename)
     return fig, filename
 
 
-def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1):
+def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1, color_scheme=None, pattern_scheme=None):
+    print(f"Plotting funding treemap for {param}, {min_year}-{max_year}...")
+    df[param] = df[param].fillna("None")
     df[param] = df.apply(
         lambda r: r[param] if r["count"] > threshold else "Other", axis=1
     )
@@ -696,20 +799,23 @@ def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1):
         values="count",
         title=f"Funding information ({param}), {min_year}-{max_year}",
         color=param,
-        color_discrete_map={"None": "grey"}
+        color_discrete_map=color_scheme
     )
-    filename = f"{OUT_DIR}/{param}_{min_year}-{max_year}"
-    df_grouped.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
-    fig.write_image(f"{filename}.png")
+    fig = apply_global_patterns(fig, pattern_scheme)
+    filename = f"{param}_{min_year}-{max_year}"
+    df_grouped.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
+    save_figure(fig, filename)
     return fig, filename
 
 def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=None, color_scheme=None, pattern_scheme=None):
+    print(f"Plotting treemap for {param}, {min_year}-{max_year}...")
     df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
     df_filtered[param] = df.apply(
         lambda r: r[param] if r["count"] > threshold else "Other", axis=1
     )
     # merge all Other rows into one
     df_grouped = df_filtered.groupby(param)["count"].sum().reset_index()
+    df_grouped["structure"] = df_grouped["structure"].fillna("None")
     if df_map is not None:
         df_grouped = (df_grouped.merge(df_map, left_on="structure", right_on="subjectid", how="left")
                       .drop(columns=["subjectid", "structure"])
@@ -724,13 +830,14 @@ def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=Non
         color_discrete_map=color_scheme
     )
     fig = apply_global_patterns(fig, pattern_scheme)
-    filename = f"{OUT_DIR}/{param}_{min_year}-{max_year}"
-    df_grouped.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
-    fig.write_image(f"{filename}.png")
+    filename = f"{param}_{min_year}-{max_year}"
+    df_grouped.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
+    save_figure(fig, filename)
     return fig, filename
 
 def plot_creators(df, min_year="", max_year="", top_n=100):
-     # combine family and given into one label
+    print(f"Plotting top {top_n} creators chart for {min_year}-{max_year}...")
+    # combine family and given into one label
     df["creator"] = df["given"] + " " + df["family"]
 
     df_grouped = df.groupby("creator")["count"].sum().reset_index()
@@ -743,12 +850,13 @@ def plot_creators(df, min_year="", max_year="", top_n=100):
         title=f"Top {top_n} creators, {min_year}-{max_year}"
     )
 
-    filename = f"{OUT_DIR}/top_{top_n}_creators_{min_year}-{max_year}"
-    df_grouped.to_csv(f"{filename}.csv", index=False, encoding="utf-8")
-    fig.write_image(f"{filename}.png")
+    filename = f"top_{top_n}_creators_{min_year}-{max_year}"
+    df_grouped.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
+    save_figure(fig, filename)
     return fig, filename
 
 def map_subjects_or_structures(collection, type="subjects", df_map=None):
+    print(f"Creating color and shape maps for {type}...")
     if type == "types":
         df = get_types(collection)
     if type == "projectacronym":
@@ -765,7 +873,11 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
         df["name"] = df["name"].str.split(" - ").str[-1]
         df = df.rename(columns={"name": "cat"})
     elif type == "types" or type == "projectacronym":
-        df = df.rename(columns={"type": "cat"})
+        if type == "types":
+            type = "type"
+        else:
+            df["projectacronym"] = df["projectacronym"].fillna("None")
+        df = df.rename(columns={type: "cat"})
     categories = sorted(df["cat"].unique())
     # px.colors.qualitative.Plotly
     # px.colors.qualitative.Set1
@@ -788,11 +900,13 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
         shape_map.update(ssd_shape_map)
 
     color_map.update({
-        "other": "grey"
+        "Other": "lightgrey",
+        "None": "grey"
     })
 
     shape_map.update({
-        "other": ""
+        "Other": "/",
+        "None": "/"
     })
 
     return color_map, shape_map
@@ -852,20 +966,26 @@ if __name__ == "__main__":
 
     TYPES_COLOR_MAP, TYPES_PATTERN_MAP = map_subjects_or_structures(collection, type="types")
     
-    types_plot, types_filename = plot_histogram(types, 2015, 2025, color_map=TYPES_COLOR_MAP, pattern_map=TYPES_PATTERN_MAP)
+    types_plot, types_filename = plot_histogram(types, 2015, 2025, 
+                                                color_map=TYPES_COLOR_MAP, 
+                                                pattern_map=TYPES_PATTERN_MAP,
+                                                add_labels=True)
     grouped_types_plot, grouped_types_filename = plot_grouped_histogram(df=types,
                                                                         color_map=TYPES_COLOR_MAP,
-                                                                        pattern_map=TYPES_PATTERN_MAP)
+                                                                        pattern_map=TYPES_PATTERN_MAP,
+                                                                        add_labels=True)
     datasets_plot, datasets_filename = plot_histogram(types, 2015, 2025, 
                                                       type_filter=["dataset", "software"],
                                                       collapse_all=True,
                                                       color_map=TYPES_COLOR_MAP,
-                                                      pattern_map=TYPES_PATTERN_MAP)
+                                                      pattern_map=TYPES_PATTERN_MAP,
+                                                      add_labels=True)
     grouped_datasets_plot, grouped_datasets_filename = plot_grouped_histogram(df=types,
                                                                               type_filter=["dataset", "software"],
                                                                               collapse_all=True,
                                                                               color_map=TYPES_COLOR_MAP,
-                                                                              pattern_map=TYPES_PATTERN_MAP)
+                                                                              pattern_map=TYPES_PATTERN_MAP,
+                                                                              add_labels=True)
     sizes = get_filesize(collection)
     sizes_plot, sizes_filename = plot_size_histogram(sizes, min_year=2015, max_year=2025)
     grouped_sizes_plot, grouped_sizes_filename = plot_group_sizes(df=sizes)
@@ -873,11 +993,13 @@ if __name__ == "__main__":
     size_per_record_plot, size_per_record_filename = plot_size_histogram(sizes_per_record, 
                                                                          min_year=2015,
                                                                          max_year=2025,
-                                                                         param="median_dataset_size")
+                                                                         param="median_dataset_size",
+                                                                         log_scale=False)
     grouped_median_sizes = get_grouped_median_sizes(collection)
     grouped_median_sizes_plot, grouped_median_sizes_filename = plot_size_histogram(df=grouped_median_sizes,
                                                                                    param="median_dataset_size",
-                                                                                   x_axis="year_range")
+                                                                                   x_axis="year_range",
+                                                                                   log_scale=False)
     related = get_related_id(collection)
     related = related.rename(columns={"has_relatedid": "type"})
     related["type"] = related["type"].map({True: "has relatedid", False: "no relatedid"})
@@ -934,38 +1056,36 @@ if __name__ == "__main__":
         r.write("\n## Documenti per tipologia\n")
     #     f.write(types_plot.to_html(full_html=False, include_plotlyjs="cdn"))
     #     f.write("Scarica il file CSV: <a href='" + types_filename + ".csv' download>Download CSV</a><br>")
-        r.write(f"\n![Documenti per tipologia]({types_filename}.png)\n\nScarica il file CSV: [{types_filename}.csv]({types_filename}.csv)\n")
+        r.write(f"\n![Documenti per tipologia]({SVG_PATH}/{types_filename}.svg)\n\nScarica il file CSV: [{types_filename}.csv]({CSV_PATH}/{types_filename}.csv)\n")
     #     f.write(grouped_types_plot.to_html(full_html=False, include_plotlyjs="cdn"))
     #     f.write("Scarica il file CSV: <a href='" + grouped_types_filename + ".csv' download>Download CSV</a><br>")
-        r.write(f"\n![Documenti per tipologia]({grouped_types_filename}.png)\n\nScarica il file CSV: [{grouped_types_filename}.csv]({grouped_types_filename}.csv)\n")
+        r.write(f"\n![Documenti per tipologia]({SVG_PATH}/{grouped_types_filename}.svg)\n\nScarica il file CSV: [{grouped_types_filename}.csv]({CSV_PATH}/{grouped_types_filename}.csv)\n")
     #     f.write(datasets_plot.to_html(full_html=False, include_plotlyjs=False))
     #     f.write("Scarica il file CSV: <a href='" + datasets_filename + ".csv' download>Download CSV</a><br>")
-        r.write(f"\n![Documenti per tipologia]({datasets_filename}.png)\n\nScarica il file CSV: [{datasets_filename}.csv]({datasets_filename}.csv)\n")
+        r.write(f"\n![Documenti per tipologia]({SVG_PATH}/{datasets_filename}.svg)\n\nScarica il file CSV: [{datasets_filename}.csv]({CSV_PATH}/{datasets_filename}.csv)\n")
     #     f.write(grouped_datasets_plot.to_html(full_html=False, include_plotlyjs=False))
     #     f.write("Scarica il file CSV: <a href='" + grouped_datasets_filename + ".csv' download>Download CSV</a><br>")
-        r.write(f"\n![Documenti per tipologia]({grouped_datasets_filename}.png)\n\nScarica il file CSV: [{grouped_datasets_filename}.csv]({grouped_datasets_filename}.csv)\n")
+        r.write(f"\n![Documenti per tipologia]({SVG_PATH}/{grouped_datasets_filename}.svg)\n\nScarica il file CSV: [{grouped_datasets_filename}.csv]({CSV_PATH}/{grouped_datasets_filename}.csv)\n")
     #     f.write("<h1>Dataset con collegamento a pubblicazione</h1>")
         r.write("\n## Dataset con collegamento a pubblicazione\n")
     #     f.write(related_plot.to_html(full_html=False, include_plotlyjs=False))
     #     f.write("Scarica il file CSV: <a href='" + related_filename + ".csv' download>Download CSV</a><br>")
-        r.write(f"\n![Dataset con collegamento a pubblicazione]({related_filename}.png)\n\nScarica il file CSV: [{related_filename}.csv]({related_filename}.csv)\n")
+        r.write(f"\n![Dataset con collegamento a pubblicazione]({SVG_PATH}/{related_filename}.svg)\n\nScarica il file CSV: [{related_filename}.csv]({CSV_PATH}/{related_filename}.csv)\n")
     #     f.write(grouped_related_plot.to_html(full_html=False, include_plotlyjs=False))
     #     f.write("Scarica il file CSV: <a href='" + grouped_related_filename + ".csv' download>Download CSV</a><br>")
-        r.write(f"\n![Dataset con collegamento a pubblicazione]({grouped_related_filename}.png)\n\nScarica il file CSV: [{grouped_related_filename}.csv]({grouped_related_filename}.csv)\n")
+        r.write(f"\n![Dataset con collegamento a pubblicazione]({SVG_PATH}/{grouped_related_filename}.svg)\n\nScarica il file CSV: [{grouped_related_filename}.csv]({CSV_PATH}/{grouped_related_filename}.csv)\n")
     #     f.write("<h1>Volume dei dataset</h1>")
         r.write("\n## Volume dei dataset\n")
     #     f.write(sizes_plot.to_html(full_html=False, include_plotlyjs=False))
     #     f.write("Scarica il file CSV: <a href='" + sizes_filename + ".csv' download>Download CSV</a><br>")
-        r.write(f"\n![Volume dei dataset]({sizes_filename}.png)\n\nScarica il file CSV: [{sizes_filename}.csv]({sizes_filename}.csv)\n")
+        r.write(f"\n![Volume dei dataset]({SVG_PATH}/{sizes_filename}.svg)\n\nScarica il file CSV: [{sizes_filename}.csv]({CSV_PATH}/{sizes_filename}.csv)\n")
     #     f.write(grouped_sizes_plot.to_html(full_html=False, include_plotlyjs=False))
     #     f.write("Scarica il file CSV: <a href='" + grouped_sizes_filename + ".csv' download>Download CSV</a><br>")
-        r.write(f"\n![Volume dei dataset]({grouped_sizes_filename}.png)\n\nScarica il file CSV: [{grouped_sizes_filename}.csv]({grouped_sizes_filename}.csv)\n")
+        r.write(f"\n![Volume dei dataset]({SVG_PATH}/{grouped_sizes_filename}.svg)\n\nScarica il file CSV: [{grouped_sizes_filename}.csv]({CSV_PATH}/{grouped_sizes_filename}.csv)\n")
 
-        r.write(f"\n![Volume dei dataset]({size_per_record_filename}.png)\n\nScarica il file CSV: [{size_per_record_filename}.csv]({size_per_record_filename}.csv)\n")
+        r.write(f"\n![Volume dei dataset]({SVG_PATH}/{size_per_record_filename}.svg)\n\nScarica il file CSV: [{size_per_record_filename}.csv]({CSV_PATH}/{size_per_record_filename}.csv)\n")
 
-        r.write(f"\n![Volume dei dataset]({grouped_median_sizes_filename}.png)\n\nScarica il file CSV: [{grouped_median_sizes_filename}.csv]({grouped_median_sizes_filename}.csv)\n")
-
-        
+        r.write(f"\n![Volume dei dataset]({SVG_PATH}/{grouped_median_sizes_filename}.svg)\n\nScarica il file CSV: [{grouped_median_sizes_filename}.csv]({CSV_PATH}/{grouped_median_sizes_filename}.csv)\n")
 
     #     f.write("<h1>Settori disciplinari (dataset e software)</h1>")
         r.write("\n## Settori disciplinari\n")
@@ -981,13 +1101,17 @@ if __name__ == "__main__":
                                                                   end_year=end_year,
                                                                   color_map=SUBJECTS_COLOR_MAP,
                                                                   pattern_map=SUBJECTS_PATTERN_MAP)
-            simple_subjects_plot, simple_subjects_filename = plot_simple_subject_chart(df=subjects, param="subject", threshold=threshold, start_year=start_year, end_year=end_year)
+            # simple_subjects_plot, simple_subjects_filename = plot_simple_subject_chart(df=subjects,
+            #                                                                            param="subject",
+            #                                                                            threshold=threshold,
+            #                                                                            start_year=start_year,
+            #                                                                            end_year=end_year)
     #         f.write(subjects_plot.to_html(full_html=False, include_plotlyjs=False))
     #         f.write("Scarica il file CSV: <a href='" + subjects_filename + ".csv' download>Download CSV</a><br>")
     #         f.write(simple_subjects_plot.to_html(full_html=False, include_plotlyjs=False))
     #         f.write("Scarica il file CSV: <a href='" + simple_subjects_filename + ".csv' download>Download CSV</a><br>")
-            r.write(f"\n![Settori disciplinari]({subjects_filename}.png)\n\nScarica il file CSV: [{subjects_filename}.csv]({subjects_filename}.csv)\n")
-    #        r.write(f"\n![Settori disciplinari (semplice)]({simple_subjects_filename}.png)\n\nScarica il file CSV: [{simple_subjects_filename}.csv]({simple_subjects_filename}.csv)\n")
+            r.write(f"\n![Settori disciplinari]({SVG_PATH}/{subjects_filename}.svg)\n\nScarica il file CSV: [{subjects_filename}.csv]({CSV_PATH}/{subjects_filename}.csv)\n")
+    #        r.write(f"\n![Settori disciplinari (semplice)]({SVG_PATH}/{simple_subjects_filename}.svg)\n\nScarica il file CSV: [{simple_subjects_filename}.csv]({CSV_PATH}/{simple_subjects_filename}.csv)\n")
 
     #     f.write("<h1>Strutture (dataset e software)</h1>")
         r.write("\n## Strutture (dataset e software)\n")
@@ -1004,7 +1128,7 @@ if __name__ == "__main__":
                                               pattern_scheme=STRUCTURES_PATTERN_MAP)
     #        f.write(structures_plot.to_html(full_html=False, include_plotlyjs=False))
     #        f.write("Scarica il file CSV: <a href='" + structures_filename + ".csv' download>Download CSV</a><br>")
-            r.write(f"\n![Strutture]({structures_filename}.png)\n\nScarica il file CSV: [{structures_filename}.csv]({structures_filename}.csv)\n")
+            r.write(f"\n![Strutture]({SVG_PATH}/{structures_filename}.svg)\n\nScarica il file CSV: [{structures_filename}.csv]({CSV_PATH}/{structures_filename}.csv)\n")
 
     #     f.write("<h1>Progetti (dataset e software)</h1>")
         r.write("\n## Progetti\n")
@@ -1012,10 +1136,15 @@ if __name__ == "__main__":
             param = "projectacronym"
             end_year = start_year + 2 if start_year > 2015 else start_year + 4
             projects = get_funding_info(collection, param, start_year, end_year, get_all=True)
-            projects_plot, projects_filename = plot_funding_treemap(projects, param, start_year, end_year)
+            projects_plot, projects_filename = plot_funding_treemap(projects, 
+                                                                    param, 
+                                                                    start_year, 
+                                                                    end_year,
+                                                                    color_scheme=PROJECTS_COLOR_MAP,
+                                                                    pattern_scheme=PROJECTS_PATTERN_MAP)
     #         f.write(projects_plot.to_html(full_html=False, include_plotlyjs=False))
     #         f.write("Scarica il file CSV: <a href='" + projects_filename + ".csv' download>Download CSV</a><br>")
-            r.write(f"\n![Progetti]({projects_filename}.png)\n\nScarica il file CSV: [{projects_filename}.csv]({projects_filename}.csv)\n")
+            r.write(f"\n![Progetti]({SVG_PATH}/{projects_filename}.svg)\n\nScarica il file CSV: [{projects_filename}.csv]({CSV_PATH}/{projects_filename}.csv)\n")
 
     #     f.write("<h1>Enti finanziatori (dataset e software)</h1>")
     #     r.write("\n## Enti finanziatori\n")

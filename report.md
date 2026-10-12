@@ -2,76 +2,88 @@
 
 ## Documenti per tipologia
 
-![Documenti per tipologia](out/documents_2015-2025.png)
+![Documenti per tipologia](out/svg/documents_2015-2025.svg)
 
-Scarica il file CSV: [out/documents_2015-2025.csv](out/documents_2015-2025.csv)
+Scarica il file CSV: [documents_2015-2025.csv](out/csv/documents_2015-2025.csv)
 
-![Documenti per tipologia](out/documents_2015-2019_2020-2022_2023-2025.png)
+![Documenti per tipologia](out/svg/documents_2015-2019_2020-2022_2023-2025.svg)
 
-Scarica il file CSV: [out/documents_2015-2019_2020-2022_2023-2025.csv](out/documents_2015-2019_2020-2022_2023-2025.csv)
+Scarica il file CSV: [documents_2015-2019_2020-2022_2023-2025.csv](out/csv/documents_2015-2019_2020-2022_2023-2025.csv)
 
-![Documenti per tipologia](out/documents_2015-2025_dataset_software_.png)
+![Documenti per tipologia](out/svg/documents_2015-2025_dataset_software_.svg)
 
-Scarica il file CSV: [out/documents_2015-2025_dataset_software_.csv](out/documents_2015-2025_dataset_software_.csv)
+Scarica il file CSV: [documents_2015-2025_dataset_software_.csv](out/csv/documents_2015-2025_dataset_software_.csv)
 
-![Documenti per tipologia](out/documents_2015-2019_2020-2022_2023-2025_dataset_software_.png)
+![Documenti per tipologia](out/svg/documents_2015-2019_2020-2022_2023-2025_dataset_software_.svg)
 
-Scarica il file CSV: [out/documents_2015-2019_2020-2022_2023-2025_dataset_software_.csv](out/documents_2015-2019_2020-2022_2023-2025_dataset_software_.csv)
+Scarica il file CSV: [documents_2015-2019_2020-2022_2023-2025_dataset_software_.csv](out/csv/documents_2015-2019_2020-2022_2023-2025_dataset_software_.csv)
 
 ## Dataset con collegamento a pubblicazione
 
-![Dataset con collegamento a pubblicazione](out/relatedid_2017-2025.png)
+![Dataset con collegamento a pubblicazione](out/svg/relatedid_2017-2025.svg)
 
-Scarica il file CSV: [out/relatedid_2017-2025.csv](out/relatedid_2017-2025.csv)
+Scarica il file CSV: [relatedid_2017-2025.csv](out/csv/relatedid_2017-2025.csv)
 
-![Dataset con collegamento a pubblicazione](out/relatedid_2015-2019_2020-2022_2023-2025.png)
+![Dataset con collegamento a pubblicazione](out/svg/relatedid_2015-2019_2020-2022_2023-2025.svg)
 
-Scarica il file CSV: [out/relatedid_2015-2019_2020-2022_2023-2025.csv](out/relatedid_2015-2019_2020-2022_2023-2025.csv)
+Scarica il file CSV: [relatedid_2015-2019_2020-2022_2023-2025.csv](out/csv/relatedid_2015-2019_2020-2022_2023-2025.csv)
 
 ## Volume dei dataset
 
-![Volume dei dataset](out/total_filesize_2015-2025.png)
+![Volume dei dataset](out/svg/total_filesize_2015-2025.svg)
 
-Scarica il file CSV: [out/total_filesize_2015-2025.csv](out/total_filesize_2015-2025.csv)
+Scarica il file CSV: [total_filesize_2015-2025.csv](out/csv/total_filesize_2015-2025.csv)
 
-![Volume dei dataset](out/total_filesize_2015-2019_2020-2022_2023-2025_.png)
+![Volume dei dataset](out/svg/total_filesize_2015-2019_2020-2022_2023-2025_.svg)
 
-Scarica il file CSV: [out/total_filesize_2015-2019_2020-2022_2023-2025_.csv](out/total_filesize_2015-2019_2020-2022_2023-2025_.csv)
+Scarica il file CSV: [total_filesize_2015-2019_2020-2022_2023-2025_.csv](out/csv/total_filesize_2015-2019_2020-2022_2023-2025_.csv)
 
-![Volume dei dataset](out/median_dataset_size_2015-2025.png)
+![Volume dei dataset](out/svg/median_dataset_size_2015-2025.svg)
 
-Scarica il file CSV: [out/median_dataset_size_2015-2025.csv](out/median_dataset_size_2015-2025.csv)
+Scarica il file CSV: [median_dataset_size_2015-2025.csv](out/csv/median_dataset_size_2015-2025.csv)
 
-![Volume dei dataset](out/median_dataset_size_None-None.png)
+![Volume dei dataset](out/svg/median_dataset_size_None-None.svg)
 
-Scarica il file CSV: [out/median_dataset_size_None-None.csv](out/median_dataset_size_None-None.csv)
+Scarica il file CSV: [median_dataset_size_None-None.csv](out/csv/median_dataset_size_None-None.csv)
 
 ## Settori disciplinari
 
-![Settori disciplinari](out/subject_2015-2019.png)
+![Settori disciplinari](out/svg/subject_2015-2019.svg)
 
-Scarica il file CSV: [out/subject_2015-2019.csv](out/subject_2015-2019.csv)
+Scarica il file CSV: [subject_2015-2019.csv](out/csv/subject_2015-2019.csv)
 
-![Settori disciplinari](out/subject_2020-2022.png)
+![Settori disciplinari](out/svg/subject_2020-2022.svg)
 
-Scarica il file CSV: [out/subject_2020-2022.csv](out/subject_2020-2022.csv)
+Scarica il file CSV: [subject_2020-2022.csv](out/csv/subject_2020-2022.csv)
 
-![Settori disciplinari](out/subject_2023-2025.png)
+![Settori disciplinari](out/svg/subject_2023-2025.svg)
 
-Scarica il file CSV: [out/subject_2023-2025.csv](out/subject_2023-2025.csv)
+Scarica il file CSV: [subject_2023-2025.csv](out/csv/subject_2023-2025.csv)
 
-## Strutture
+## Strutture (dataset e software)
 
-![Strutture](out/structure_2015-2019.png)
+![Strutture](out/svg/structure_2015-2019.svg)
 
-Scarica il file CSV: [out/structure_2015-2019.csv](out/structure_2015-2019.csv)
+Scarica il file CSV: [structure_2015-2019.csv](out/csv/structure_2015-2019.csv)
 
-![Strutture](out/structure_2020-2022.png)
+![Strutture](out/svg/structure_2020-2022.svg)
 
-Scarica il file CSV: [out/structure_2020-2022.csv](out/structure_2020-2022.csv)
+Scarica il file CSV: [structure_2020-2022.csv](out/csv/structure_2020-2022.csv)
 
-![Strutture](out/structure_2023-2025.png)
+![Strutture](out/svg/structure_2023-2025.svg)
 
-Scarica il file CSV: [out/structure_2023-2025.csv](out/structure_2023-2025.csv)
+Scarica il file CSV: [structure_2023-2025.csv](out/csv/structure_2023-2025.csv)
 
 ## Progetti
+
+![Progetti](out/svg/projectacronym_2015-2019.svg)
+
+Scarica il file CSV: [projectacronym_2015-2019.csv](out/csv/projectacronym_2015-2019.csv)
+
+![Progetti](out/svg/projectacronym_2020-2022.svg)
+
+Scarica il file CSV: [projectacronym_2020-2022.csv](out/csv/projectacronym_2020-2022.csv)
+
+![Progetti](out/svg/projectacronym_2023-2025.svg)
+
+Scarica il file CSV: [projectacronym_2023-2025.csv](out/csv/projectacronym_2023-2025.csv)
