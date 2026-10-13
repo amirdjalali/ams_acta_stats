@@ -1,0 +1,18 @@
+year_range,type,count
+2016-2019,article,76
+2016-2019,book_section,132
+2016-2019,conference_item,23
+2016-2019,dataset/software,48
+2016-2019,monograph,1082
+2016-2019,preprint/working paper,25
+2020-2022,article,4
+2020-2022,book_section,53
+2020-2022,conference_item,11
+2020-2022,dataset/software,157
+2020-2022,monograph,260
+2020-2022,preprint/working paper,35
+2023-2025,book_section,215
+2023-2025,conference_item,30
+2023-2025,dataset/software,310
+2023-2025,monograph,237
+2023-2025,preprint/working paper,32

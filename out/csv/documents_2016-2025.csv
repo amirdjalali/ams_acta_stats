@@ -1,0 +1,55 @@
+count,year,type
+869,2016,monograph
+25,2016,book_section
+20,2016,article
+6,2016,conference_item
+5,2016,preprint/working paper
+3,2016,dataset/software
+92,2017,monograph
+65,2017,book_section
+20,2017,article
+8,2017,dataset/software
+4,2017,preprint/working paper
+2,2017,conference_item
+59,2018,monograph
+32,2018,article
+30,2018,book_section
+11,2018,preprint/working paper
+10,2018,dataset/software
+3,2018,conference_item
+62,2019,monograph
+27,2019,dataset/software
+12,2019,book_section
+12,2019,conference_item
+5,2019,preprint/working paper
+4,2019,article
+85,2020,monograph
+54,2020,dataset/software
+20,2020,book_section
+12,2020,preprint/working paper
+4,2020,article
+1,2020,conference_item
+77,2021,monograph
+46,2021,dataset/software
+23,2021,book_section
+14,2021,preprint/working paper
+98,2022,monograph
+57,2022,dataset/software
+10,2022,book_section
+10,2022,conference_item
+9,2022,preprint/working paper
+72,2023,monograph
+35,2023,dataset/software
+34,2023,book_section
+17,2023,conference_item
+7,2023,preprint/working paper
+115,2024,book_section
+106,2024,dataset/software
+90,2024,monograph
+9,2024,conference_item
+7,2024,preprint/working paper
+169,2025,dataset/software
+75,2025,monograph
+66,2025,book_section
+18,2025,preprint/working paper
+4,2025,conference_item

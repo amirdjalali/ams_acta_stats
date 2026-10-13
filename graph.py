@@ -19,9 +19,9 @@ DEFAULT_SCALE = 2
 CACHE_DIR = "queries"
 USE_CACHED_IMG = False
 SAVE_SVG = True
-SAVE_PNG = False
+SAVE_PNG = True
 
-figures = {}
+figures = []
 
 def connect_to_db(client_url, db_name, collection_name):
     print("Connecting to MongoDB...")
@@ -84,7 +84,7 @@ def get_subjects_or_structures(collection, type="subjects"):
         df.to_csv(f"{CACHE_DIR}/{type}.csv", index=False, encoding="utf-8")
         return df
 
-def get_types(collection):
+def get_types(collection, collapse_types=False):
     if os.path.exists(f"{CACHE_DIR}/types.csv"):
         print("Loading cached types data...")
         df = pd.read_csv(f"{CACHE_DIR}/types.csv", encoding="utf-8")
@@ -111,6 +111,21 @@ def get_types(collection):
                 "$sort": { "_id.year": 1, "count": -1 }
             }
         ]
+
+        if collapse_types:
+            pipeline.insert(1, {
+                "$addFields": {
+                    "type": {
+                        "$switch": {
+                            "branches": [
+                                { "case": { "$in": ["$type", ["software", "dataset"]] }, "then": "dataset/software" },
+                                { "case": { "$in": ["$type", ["preprint", "working_paper"]] }, "then": "preprint/working paper" }
+                            ],
+                            "default": "$type"
+                        }
+                    }
+                }
+            },)
 
         results = list(collection.aggregate(pipeline))
         df = pd.json_normalize(results).rename(columns={
@@ -256,11 +271,9 @@ def get_filesizes_per_dataset(collection):
 
 def get_grouped_median_sizes(collection, bins=None):
     if bins is None:
-        bins = [2015, 2020, 2023, 2026]
-    years = str(bins[0]) + "-"
-    for year in bins[1:]:
-        years += str(year -1) + "_" + str(year) + "-"
-    years = years[:-6]
+        bins = [2016, 2020, 2023, 2026]
+    range_labels = [f"{bins[i]}-{bins[i+1]}" for i in range(len(bins)-1)]
+    years = "_".join(range_labels)
     if os.path.exists(f"{CACHE_DIR}/median_dataset_sizes_{years}.csv"):
         print(f"Loading cached grouped median dataset sizes data for {years}...")
         df = pd.read_csv(f"{CACHE_DIR}/median_dataset_sizes_{years}.csv", encoding="utf-8")
@@ -274,7 +287,7 @@ def get_grouped_median_sizes(collection, bins=None):
                     { "$gte": ["$_id.year", bins[i]] },
                     { "$lt": ["$_id.year", bins[i+1]] }
                 ]},
-                "then": f"{bins[i]}-{bins[i+1]}"
+                "then": range_labels[i]  # ← use same label
             })
 
         pipeline = [
@@ -304,7 +317,7 @@ def get_grouped_median_sizes(collection, bins=None):
                     "year_range": {
                         "$switch": {
                             "branches": branches,
-                            "default": "other"
+                            "default": "$REMOVE"
                         }
                     }
                 }
@@ -356,14 +369,18 @@ def get_funding_info(collection, param, start_year, end_year, get_all=False):
                     }
                 },
                 {
-                    "$project": {
+                    "$project": { 
                         param: 1,
+                        "fundingprogramme": 1,
                         "_id": 0
                     }
                 },
                 {
                     "$group": {
-                        "_id": f"${param}",
+                        "_id": {
+                            "param": f"${param}",
+                            "fundingprogramme": "$fundingprogramme",
+                        },
                         "count": {
                             "$sum": 1
                         }
@@ -390,12 +407,16 @@ def get_funding_info(collection, param, start_year, end_year, get_all=False):
             {
                 "$project": { 
                     param: 1,
+                    "fundingprogramme": 1,
                     "_id": 0
                 }
             },
             {
                 "$group": {
-                    "_id": f"${param}",
+                    "_id": {
+                        "param": f"${param}",
+                        "fundingprogramme": "$fundingprogramme",
+                    },
                     "count": {
                         "$sum": 1
                     }
@@ -409,7 +430,7 @@ def get_funding_info(collection, param, start_year, end_year, get_all=False):
         ]
 
         results = list(collection.aggregate(pipeline))
-        df = pd.json_normalize(results).rename(columns={"_id": param})
+        df = pd.json_normalize(results).rename(columns={"_id.param": param, "_id.fundingprogramme": "fundingprogramme"})
         df.to_csv(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv", index=False, encoding="utf-8")
         return df
 
@@ -511,8 +532,8 @@ def save_figure(fig, filename, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, 
         fig.write_image(f"{OUT_DIR}/{SVG_DIR}/{filename}.svg")
 
 def save_all_figures(figures_dict, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, use_cached=USE_CACHED_IMG):
-    for filename, fig in figures_dict.items():
-        save_figure(fig, filename, scale=scale, png=png, svg=svg, use_cached=use_cached)
+    for figure in figures_dict:
+        save_figure(figure["fig"], figure["filename"], scale=scale, png=png, svg=svg, use_cached=use_cached)
 
 def plot_subject_chart(df, param, 
                        threshold=0, 
@@ -536,10 +557,10 @@ def plot_subject_chart(df, param,
     df_clean.loc[df_clean["macro_sector"] == "other", "subject"] = "other"
     # remove subject is subject count is lesser than min
     df_clean["subject"] = [label if subjects_dict.get(label, 0) > threshold else "other" for label in df_clean["subject"]]
+    title=f"Subjects distribution, {start_year}-{end_year}"
     fig = px.sunburst(df_clean, 
                        path=["macro_sector", "subject"], 
-                       values="count", 
-                       title=f"Subjects Distribution, {start_year}-{end_year}",
+                       values="count",
                        color="macro_sector",
                        color_discrete_map=color_map
             )
@@ -548,7 +569,47 @@ def plot_subject_chart(df, param,
     filename = f"{param}_{start_year}-{end_year}"
     df_clean.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
     #save_figure(fig, filename)
-    figures[filename] = fig
+    figures.append({
+                    "filename": filename,
+                    "fig": fig,
+                    "title": title
+                })
+    return fig, filename
+
+def plot_pie_chart(df, param, start_year=2016, end_year=2025, threshold=0, color_map=None, pattern_map=None):
+    df_filtered = df[df["year"].isin(range(start_year, end_year))]
+    df_grouped = df_filtered.groupby(param)["count"].sum().reset_index()
+    print(f"Plotting simple subject chart for {param}...")
+    title=f"{param} distribution, {start_year}-{end_year}"
+    fig = px.pie(
+        df_grouped,
+        names=param,
+        values="count",
+        color=param,
+        color_discrete_map=color_map
+    )
+    
+    fig.update_traces(
+        textposition="outside",
+        textinfo="percent",
+        texttemplate="%{percent:.1%}",
+        marker=dict(
+            pattern=dict(
+                shape=[pattern_map[cat] for cat in df_grouped[param]],
+                solidity=0.1,
+                fgcolor="black",  # pattern color
+                bgcolor=[color_map[cat] for cat in df_grouped[param]]  # background color
+            )
+        )
+    )
+
+    filename = f"pie_{param}_{start_year}-{end_year}"
+    df.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
+    figures.append({
+        "filename": filename,
+        "fig": fig,
+        "title": title
+    })
     return fig, filename
 
 def plot_simple_subject_chart(df, param, threshold=0, start_year=None, end_year=None):
@@ -561,21 +622,28 @@ def plot_simple_subject_chart(df, param, threshold=0, start_year=None, end_year=
     # lump sectors at or below the threshold into "other"
     counts.loc[counts["count"] <= threshold, "macro_sector"] = "other"
     counts = counts.groupby("macro_sector", as_index=False)["count"].sum()
-
+    title=f"Macro Sectors Distribution, {start_year}-{end_year}"
     fig = px.pie(
         counts,
         names="macro_sector",
-        values="count",
-        title=f"Macro Sectors Distribution, {start_year}-{end_year}",
+        values="count"
     )
 
     filename = f"simple_{param}_{start_year}-{end_year}"
     counts[["macro_sector", "count"]].to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
     #save_figure(fig, filename)
-    figures[filename] = fig
+    figures.append({
+            "filename": filename,
+            "fig": fig,
+            "title": title
+        })
     return fig, filename
 
-def plot_size_histogram(df, min_year=None, max_year=None, param="total_filesize", x_axis="year", log_scale=True):
+def plot_size_histogram(df, min_year=None, 
+                        max_year=None, 
+                        param="total_filesize", 
+                        x_axis="year", 
+                        log_scale=True):
     print(f"Plotting size histogram for {param}, {min_year}-{max_year}...")
     if min_year and max_year:
         df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
@@ -588,35 +656,49 @@ def plot_size_histogram(df, min_year=None, max_year=None, param="total_filesize"
         div = 2
         unit = "MB"
     df_filtered[param] = df_filtered[param] / (1024 ** div)
+    title=f"{param} by {x_axis} ({unit})" + (", log scale" if log_scale else "")
     fig = px.histogram(
         df_filtered,
         x=df_filtered[x_axis].astype(str),
         y=param,
-        title=f"{param} by Year ({unit})",
         log_y=log_scale,
         color_discrete_sequence=["#AB63FA"],
         pattern_shape_sequence=["x"],
         text_auto=".1f"
     )
+
     if log_scale:
-        fig.update_layout(title=f"{param} by Year ({unit}, log scale)")
         fig.update_yaxes(
             title_text="",        # remove y axis label
             tickmode="array",
             tickvals=[.001, .01, .1, 1, 10, 100, 1000, 10000]
         )
     else:
-        fig.update_xaxes(title_text=None)
         fig.update_yaxes(title_text=None)
+
+    fig.update_xaxes(title_text=None)
+    fig.update_layout(legend=dict(
+                        orientation="h",
+                        yanchor="top",
+                        y=-.15,
+                        xanchor="right",
+                        x=1
+                    ))
+       
     filename = f"{param}_{min_year}-{max_year}"
     df_filtered.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
     #save_figure(fig, filename)
-    figures[filename] = fig
+    figures.append({
+                "filename": filename,
+                "fig": fig,
+                "title": title
+            })
     return fig, filename
 
-def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026], param="total_filesize"):
+def plot_group_sizes(df, start_years=[2016, 2020, 2023, 2026], param="total_filesize"):
     bins = sorted(start_years)
     labels = [f"{s}-{e - 1}" for s, e in zip(bins[:-1], bins[1:])]
+    label_string = ", ".join(labels)
     print(f"Plotting grouped sizes for {labels}...")
     df_filtered = df[(df["year"] >= bins[0]) & (df["year"] < bins[-1])].copy()
     df_filtered[param] = df_filtered[param] / (1024 ** 3)  # bytes -> GB
@@ -631,11 +713,12 @@ def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026], param="total_file
         .sum()
     )
 
+    title=f"{param} by year range, {label_string} (GB, log scale)"
+
     fig = px.bar(
         df_grouped,
         x="year_range",
         y=param,
-        title=f"{param} by Year Range (GB, log scale)",
         log_y=True,
         color_discrete_sequence=["#AB63FA"],
         pattern_shape_sequence=["x"],
@@ -653,7 +736,11 @@ def plot_group_sizes(df, start_years=[2015, 2020, 2023, 2026], param="total_file
         filename += label + "_"
     df_grouped.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
     #save_figure(fig, filename)
-    figures[filename] = fig
+    figures.append({
+                    "filename": filename,
+                    "fig": fig,
+                    "title": title
+                })
     return fig, filename
 
 def plot_histogram(df, min_year=0, 
@@ -665,7 +752,8 @@ def plot_histogram(df, min_year=0,
                    color_map=None,
                    pattern_map=None,
                    plot_order=[None],
-                   add_labels=False):
+                   add_labels=False,
+                   add_percentage=False):
     
     print(f"Plotting {filename} histogram for {min_year}-{max_year}...")
     df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
@@ -687,6 +775,9 @@ def plot_histogram(df, min_year=0,
                 color_map[type_name] = color_map.get(type_filter[0])
             if pattern_map:
                 pattern_map[type_name] = pattern_map.get(type_filter[0])
+    
+    title=f"Documents by year, {min_year}-{max_year}" + (f" — {type_name}" if type_name else "")
+    
     fig = px.bar(
         df_filtered,
         x=df_filtered["year"].astype(int).astype(str),
@@ -695,10 +786,29 @@ def plot_histogram(df, min_year=0,
         pattern_shape_map=pattern_map,
         color="type",
         pattern_shape="type",
-        title=f"Documents by Year, {min_year}-{max_year}" + (f" — {type_name}" if type_name else ""),
         barmode="stack",
         category_orders={"type": plot_order}
         )
+
+    if add_percentage:
+        totals_pct = df_filtered.groupby("year")[param].sum().reset_index()
+        totals_pct = totals_pct.rename(columns={param: "total"})
+        df_filtered = df_filtered.merge(totals_pct, on="year")
+        df_filtered["percentage"] = (df_filtered[param] / df_filtered["total"] * 100).round(1)
+        
+        fig = px.bar(
+            df_filtered,
+            x=df_filtered["year"].astype(int).astype(str),
+            y=param,
+            color_discrete_map=color_map,
+            pattern_shape_map=pattern_map,
+            color="type",
+            pattern_shape="type",
+            barmode="stack",
+            category_orders={"type": plot_order},
+            text=df_filtered["percentage"].apply(lambda x: f"{x}%")
+        )
+        fig.update_traces(textposition="inside", textfont=dict(color="white"))
 
     if add_labels:
         totals = df_filtered.groupby("year")[param].sum().reset_index().sort_values("year")
@@ -714,23 +824,44 @@ def plot_histogram(df, min_year=0,
         )
 
     fig.update_xaxes(title_text=None)
-    fig.update_yaxes(range=[0, None])
+    fig.update_yaxes(range=[0, None],
+                     title_text=None)
+
+    unique_categories = df_filtered["type"].nunique()
+
+    fig.update_layout(legend=dict(
+                    orientation="h",
+                    yanchor="top",
+                    y=-.15,
+                    xanchor="right",
+                    x=1
+                ),
+                showlegend=True if unique_categories > 1 else False
+        )
     
     filename = f"{filename}_{min_year}-{max_year}" + (f"_{filter_string}" if filter_string else "")
+    filename = filename.replace("/", "-").replace("\\", "-")
     df_filtered.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
     #save_figure(fig, filename)
-    figures[filename] = fig
+    figures.append({
+                    "filename": filename,
+                    "fig": fig,
+                    "title": title
+                })
     return fig, filename
 
 def plot_grouped_histogram(df, 
-                           bins=[2015, 2020, 2023, 2026],
+                           bins=[2016, 2020, 2023, 2026],
                            type_filter=None,
+                           param="count",
                            filename="documents",
                            collapse_all=True,
                            color_map=None,
                            pattern_map=None,
-                           add_labels=False):
+                           add_labels=False,
+                           add_percentage=False):
     labels = [f"{s}-{e - 1}" for s, e in zip(bins[:-1], bins[1:])]
+    label_string = ", ".join(labels)
     print(f"Plotting grouped histogram for {labels}...")
     df_filtered = df[(df["year"] >= bins[0]) & (df["year"] < bins[-1])].copy()
     df_filtered["year_range"] = pd.cut(
@@ -760,6 +891,8 @@ def plot_grouped_histogram(df,
                 color_map[type_name] = color_map.get(type_filter[0])
             if pattern_map:
                 pattern_map[type_name] = pattern_map.get(type_filter[0])
+
+    title=f"Documents by year, {label_string}" + (f" — {type_name}" if type_name else "")
     
     fig = px.bar(
             df_grouped,
@@ -769,10 +902,28 @@ def plot_grouped_histogram(df,
             pattern_shape="type",
             color_discrete_map=color_map,
             pattern_shape_map=pattern_map,
-            title=f"Documents by Year" + (f" — {type_name}" if type_name else ""),
             barmode="stack"
             )
-    
+
+    if add_percentage:
+        totals_pct = df_grouped.groupby("year_range")[param].sum().reset_index()
+        totals_pct = totals_pct.rename(columns={param: "total"})
+        df_grouped = df_grouped.merge(totals_pct, on="year_range")
+        df_grouped["percentage"] = (df_grouped[param] / df_grouped["total"] * 100).round(1)
+        
+        fig = px.bar(
+            df_grouped,
+            x=df_grouped["year_range"].astype(str),
+            y=param,
+            color_discrete_map=color_map,
+            pattern_shape_map=pattern_map,
+            color="type",
+            pattern_shape="type",
+            barmode="stack",
+            text=df_grouped["percentage"].apply(lambda x: f"{x}%"),
+        )
+        fig.update_traces(textposition="inside", textfont=dict(color="white"))
+
     if add_labels:
         # calculate totals per year
         totals = df_grouped.groupby("year_range")["count"].sum().reset_index().sort_values("year_range")
@@ -788,12 +939,29 @@ def plot_grouped_histogram(df,
 
     fig.update_xaxes(title_text=None)
 
+    unique_categories = df_grouped["type"].nunique()
+
+    fig.update_layout(legend=dict(
+                    orientation="h",
+                    yanchor="top",
+                    y=-.15,
+                    xanchor="right",
+                    x=1
+                ),
+                showlegend=True if unique_categories > 1 else False
+    )
+
     for label in labels:
         filename += "_" + label
     filename += (f"_{filter_string}" if filter_string else "")
+    filename = filename.replace("/", "-").replace("\\", "-")
     df_grouped.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
     #save_figure(fig, filename)
-    figures[filename] = fig
+    figures.append({
+                        "filename": filename,
+                        "fig": fig,
+                        "title": title
+                    })
     return fig, filename
 
 
@@ -803,21 +971,26 @@ def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1, color
     df[param] = df.apply(
         lambda r: r[param] if r["count"] > threshold else "Other", axis=1
     )
+    df.loc[df["projectacronym"] == "Other", "fundingprogramme"] = None
     # merge all Other rows into one
-    df_grouped = df.groupby(param)["count"].sum().reset_index()
+    df_grouped = df.fillna("").groupby([param, "fundingprogramme"])["count"].sum().reset_index()
+    title=f"Funding information ({param}), {min_year}-{max_year} (threshold = {threshold})"
     fig = px.treemap(
         df_grouped,
         path=[param],
         values="count",
-        title=f"Funding information ({param}), {min_year}-{max_year}",
         color=param,
         color_discrete_map=color_scheme
     )
-    fig = apply_global_patterns(fig, pattern_scheme)
+    fig = apply_global_patterns(fig, pattern_scheme, df_grouped, param, "fundingprogramme", add_value=True)
     filename = f"{param}_{min_year}-{max_year}"
     df_grouped.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
     #save_figure(fig, filename)
-    figures[filename] = fig
+    figures.append({
+                    "filename": filename,
+                    "fig": fig,
+                    "title": title
+                })
     return fig, filename
 
 def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=None, color_scheme=None, pattern_scheme=None):
@@ -834,19 +1007,25 @@ def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=Non
                       .drop(columns=["subjectid", "structure"])
                       .rename(columns={"name": param}))
         df_grouped["structure"] = df_grouped["structure"].str.split(" - ").str[-1]
+
+    title=f"Structures, {min_year}-{max_year} (threshold = {threshold})"
+    
     fig = px.treemap(
         df_grouped,
         path=[param],
         values="count",
-        title=f"Structures, {min_year}-{max_year}",
         color=param,
         color_discrete_map=color_scheme
     )
-    fig = apply_global_patterns(fig, pattern_scheme)
+    fig = apply_global_patterns(fig, pattern_scheme, add_value=True)
     filename = f"{param}_{min_year}-{max_year}"
     df_grouped.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
     #save_figure(fig, filename)
-    figures[filename] = fig
+    figures.append({
+                    "filename": filename,
+                    "fig": fig,
+                    "title": title
+                })
     return fig, filename
 
 def plot_creators(df, min_year="", max_year="", top_n=100):
@@ -857,17 +1036,22 @@ def plot_creators(df, min_year="", max_year="", top_n=100):
     df_grouped = df.groupby("creator")["count"].sum().reset_index()
     df_grouped = df_grouped.nlargest(top_n, "count")
 
+    title=f"Top {top_n} creators, {min_year}-{max_year}"
+
     fig = px.treemap(
         df_grouped,
         path=["creator"],
         values="count",
-        title=f"Top {top_n} creators, {min_year}-{max_year}"
     )
 
     filename = f"top_{top_n}_creators_{min_year}-{max_year}"
     df_grouped.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
     #save_figure(fig, filename)
-    figures[filename] = fig
+    figures.append({
+                    "filename": filename,
+                    "fig": fig,
+                    "title": title
+                })
     return fig, filename
 
 def map_subjects_or_structures(collection, type="subjects", df_map=None):
@@ -875,7 +1059,7 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
     if type == "types":
         df = get_types(collection)
     if type == "projectacronym":
-        df = get_funding_info(collection, param="projectacronym", start_year=2015, end_year=2025, get_all=True)
+        df = get_funding_info(collection, param="projectacronym", start_year=2016, end_year=2025, get_all=True)
     else:
         df = get_subjects_or_structures(collection, type)
     
@@ -916,25 +1100,61 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
 
     color_map.update({
         "Other": "lightgrey",
+        "other": "grey",
         "None": "grey"
     })
 
     shape_map.update({
         "Other": "/",
+        "other": "/",
         "None": "/"
     })
 
     return color_map, shape_map
 
-def apply_global_patterns(fig, pattern_scheme):
+def apply_global_patterns(fig, pattern_scheme, df_source=None, param_col=None, custom_data_col=None, add_value=False):
     """
     Guarantees pattern mapping remains consistent across completely different plots,
-    matching categories by name rather than position.
+    matching categories by name rather than position. Handles custom data mapping safely
+    for treemaps if source data is provided.
     """
-    # Extract Plotly's permanent structural IDs for this specific plot
+    # 1. Handle customdata mapping ONLY if all source dataframe arguments are passed
+    if df_source is not None and param_col is not None and custom_data_col is not None:
+        custom_map = dict(zip(df_source[param_col].astype(str), df_source[custom_data_col].astype(str)))
+        ids = fig.data[0].ids
+        
+        aligned_customdata = []
+        for sector_id in ids:
+            if sector_id == "root" or not sector_id:
+                aligned_customdata.append("")
+            else:
+                category_name = sector_id.split("/")[-1]
+                aligned_customdata.append(custom_map.get(category_name, ""))
+        
+        # Inject customdata array safely into the primary trace
+        fig.data[0].customdata = aligned_customdata
+        
+        # Apply the specific text template that utilizes the new customdata
+        text_template = (
+            "<span style='color: black; text-shadow: -2px -2px 0 #FFF, 2px -2px 0 #FFF, "
+            "-2px 2px 0 #FFF, 2px 2px 0 #FFF, -2px 0 0 #FFF, 2px 0 0 #FFF, 0 -2px 0 #FFF, "
+            "0 2px 0 #FFF;'>%{label} (%{value})<br>%{customdata}</span>"
+        )
+    elif add_value:
+        text_template = (
+            "<span style='color: black; text-shadow: -2px -2px 0 #FFF, 2px -2px 0 #FFF, "
+            "-2px 2px 0 #FFF, 2px 2px 0 #FFF, -2px 0 0 #FFF, 2px 0 0 #FFF, 0 -2px 0 #FFF, "
+            "0 2px 0 #FFF;'>%{label} (%{value})</span>"
+        )
+    else:
+        text_template = (
+            "<span style='color: black; text-shadow: -2px -2px 0 #FFF, 2px -2px 0 #FFF, "
+            "-2px 2px 0 #FFF, 2px 2px 0 #FFF, -2px 0 0 #FFF, 2px 0 0 #FFF, 0 -2px 0 #FFF, "
+            "0 2px 0 #FFF;'>%{label}</span>"
+        )
+
+    # 2. Extract Plotly's structural IDs for pattern matching (Shared logic)
     ids = fig.data[0].ids
-    
-    # Safely match categories to your master dictionary
     patterns_list = []
     for sector_id in ids:
         if sector_id == "root" or not sector_id:
@@ -943,30 +1163,32 @@ def apply_global_patterns(fig, pattern_scheme):
             category_name = sector_id.split("/")[-1]
             patterns_list.append(pattern_scheme.get(category_name, ""))
             
-    # Apply to the figure trace
+    # 3. Apply styles universally to the figure trace
     fig.update_traces(
-        texttemplate="<span style='color: black; text-shadow: -2px -2px 0 #FFF, 2px -2px 0 #FFF, -2px 2px 0 #FFF, 2px 2px 0 #FFF, -2px 0 0 #FFF, 2px 0 0 #FFF, 0 -2px 0 #FFF, 0 2px 0 #FFF;'>%{label}</span>",
-        #textposition="middle center",
+        texttemplate=text_template,
+
         marker=dict(
             pattern=dict(
                 shape=patterns_list,
                 solidity=0.1,         # Subtle opacity so it doesn't overpower the colors
                 fgcolor="black",       # Forces pattern lines to be black
-                fillmode="overlay"     # FIX: Preserves the solid background color map
+                fillmode="overlay"     # Preserves the solid background color map
             )
         )
     )
     return fig
 
 def save_md_report(figures_dict, report_filename="report.md"):
-    with open(report_filename, "w") as r:
+    with open(report_filename, "w", encoding="utf-8") as r:
         r.write("# Report AMS Acta\n")
-        for filename, fig in figures_dict.items():
-            r.write(f"\n## {filename.replace('_', ' ').title()}\n")
+        for figure in figures_dict:
+            filename = figure["filename"]
+            r.write(f"\n## {figure['title']}\n")
             r.write(f"![{filename}]({SVG_PATH}/{filename}.svg)\n\n")
             r.write(f"Scarica il file CSV: [{filename}.csv]({CSV_PATH}/{filename}.csv)\n")
 
 def save_html_dashboard(figures_dict, dashboard_filename="dashboard.html"):
+    print("Writing html dashboard...")
     with open(dashboard_filename, "w") as f:
         f.write("""
                 <html>
@@ -993,17 +1215,20 @@ def save_html_dashboard(figures_dict, dashboard_filename="dashboard.html"):
                 </head>
                 <body>
                 """)
-        for filename, fig in figures_dict.items():
-            f.write(f"<h1>{filename.replace('_', ' ').title()}</h1>")
+        for figure in figures_dict:
+            filename = figure["filename"]
+            fig = figure["fig"]
+            f.write(f"<h1>{figure['title']}</h1>")
             f.write(fig.to_html(full_html=False, include_plotlyjs="cdn"))
             f.write(f"Scarica il file CSV: <a href='{CSV_PATH}/{filename}.csv' download>Download CSV</a><br>")
+            f.write(f"Scarica l'immagine in formato: <a href='{PNG_PATH}/{filename}.png'>PNG</a> | <a href='{SVG_PATH}/{filename}.svg'>SVG</a>")
         f.write("</body></html>")
 
 def create_plots():
 
     #SUBJECTS_MAP = map_subjects_or_structures(collection, "subjects")
             
-    start_years = [2015, 2020, 2023]
+    start_years = [2016, 2020, 2023]
 
     subjects_and_structures = pd.read_csv("subject_structure_map.csv", 
                                             sep=";",
@@ -1013,16 +1238,24 @@ def create_plots():
                                                 "subjectid": "str",
                                                 "name": "str"
                                             })
+
+    types_torta = pd.read_csv("torta_tipologie.csv", encoding="utf-8")
     
     collection = connect_to_db("mongodb://localhost:27017/",  "admin", "amsacta_documenti")
     STRUCTURES_COLOR_MAP, STRUCTURES_PATTERN_MAP = map_subjects_or_structures(collection, type="structures", df_map=subjects_and_structures)
     PROJECTS_COLOR_MAP, PROJECTS_PATTERN_MAP = map_subjects_or_structures(collection, type="projectacronym")
 
-    types = get_types(collection)
+    types = get_types(collection, collapse_types=True)
 
     TYPES_COLOR_MAP, TYPES_PATTERN_MAP = map_subjects_or_structures(collection, type="types")
+
+    types_torta_plot, types_torta_filename = plot_pie_chart(types,
+                                                            param="type",
+                                                            threshold=0,
+                                                            color_map=TYPES_COLOR_MAP,
+                                                            pattern_map=TYPES_PATTERN_MAP)
     
-    types_plot, types_filename = plot_histogram(types, 2015, 2025, 
+    types_plot, types_filename = plot_histogram(types, 2016, 2025, 
                                                 color_map=TYPES_COLOR_MAP, 
                                                 pattern_map=TYPES_PATTERN_MAP,
                                                 add_labels=True)
@@ -1030,24 +1263,22 @@ def create_plots():
                                                                         color_map=TYPES_COLOR_MAP,
                                                                         pattern_map=TYPES_PATTERN_MAP,
                                                                         add_labels=True)
-    datasets_plot, datasets_filename = plot_histogram(types, 2015, 2025, 
-                                                        type_filter=["dataset", "software"],
-                                                        collapse_all=True,
-                                                        color_map=TYPES_COLOR_MAP,
-                                                        pattern_map=TYPES_PATTERN_MAP,
-                                                        add_labels=True)
+    datasets_plot, datasets_filename = plot_histogram(types, 2016, 2025, 
+                                                      type_filter=["dataset/software"],
+                                                      color_map=TYPES_COLOR_MAP,
+                                                      pattern_map=TYPES_PATTERN_MAP,
+                                                      add_labels=True)
     grouped_datasets_plot, grouped_datasets_filename = plot_grouped_histogram(df=types,
-                                                                                type_filter=["dataset", "software"],
-                                                                                collapse_all=True,
+                                                                                type_filter=["dataset/software"],
                                                                                 color_map=TYPES_COLOR_MAP,
                                                                                 pattern_map=TYPES_PATTERN_MAP,
                                                                                 add_labels=True)
     sizes = get_filesize(collection)
-    sizes_plot, sizes_filename = plot_size_histogram(sizes, min_year=2015, max_year=2025)
+    sizes_plot, sizes_filename = plot_size_histogram(sizes, min_year=2016, max_year=2025)
     grouped_sizes_plot, grouped_sizes_filename = plot_group_sizes(df=sizes)
     sizes_per_record = get_filesizes_per_dataset(collection)
     size_per_record_plot, size_per_record_filename = plot_size_histogram(sizes_per_record, 
-                                                                            min_year=2015,
+                                                                            min_year=2016,
                                                                             max_year=2025,
                                                                             param="median_dataset_size",
                                                                             log_scale=False)
@@ -1073,16 +1304,18 @@ def create_plots():
                                                     filename="relatedid",
                                                     color_map=RELATED_COLOR_MAP,
                                                     pattern_map=RELATED_PATTERN_MAP,
-                                                    plot_order=["has relatedid", "no relatedid"])
+                                                    plot_order=["has relatedid", "no relatedid"],
+                                                    add_percentage=True)
     grouped_related_plot, grouped_related_filename = plot_grouped_histogram(df=related,
                                                                             filename="relatedid",
                                                                             color_map=RELATED_COLOR_MAP,
-                                                                            pattern_map=RELATED_PATTERN_MAP)
+                                                                            pattern_map=RELATED_PATTERN_MAP,
+                                                                            add_percentage=True)
 
 
     SUBJECTS_COLOR_MAP, SUBJECTS_PATTERN_MAP = map_subjects_or_structures(collection, type="subjects", df_map=subjects_and_structures)
     for start_year in start_years:
-        end_year = start_year + 2 if start_year > 2015 else start_year + 4
+        end_year = start_year + 2 if start_year > 2016 else start_year + 3
         subjects = get_subjects_or_structures(collection)
         threshold = 5 if start_year > 2019 else 1
         subjects_plot, subjects_filename = plot_subject_chart(df=subjects,
@@ -1094,7 +1327,7 @@ def create_plots():
                                                                 pattern_map=SUBJECTS_PATTERN_MAP)
         
     for start_year in start_years:
-        end_year = start_year + 2 if start_year > 2015 else start_year + 4
+        end_year = start_year + 2 if start_year > 2016 else start_year + 3
         structures = get_subjects_or_structures(collection, type="structures")
         structures_plot, structures_filename = plot_structures(df=structures, 
                                             param="structure", 
@@ -1107,14 +1340,16 @@ def create_plots():
     
     for start_year in start_years:
         param = "projectacronym"
-        end_year = start_year + 2 if start_year > 2015 else start_year + 4
+        end_year = start_year + 2 if start_year > 2016 else start_year + 3
+        threshold = 1 if start_year < 2023 else 2
         projects = get_funding_info(collection, param, start_year, end_year, get_all=True)
         projects_plot, projects_filename = plot_funding_treemap(projects, 
                                                                 param, 
                                                                 start_year, 
                                                                 end_year,
                                                                 color_scheme=PROJECTS_COLOR_MAP,
-                                                                    pattern_scheme=PROJECTS_PATTERN_MAP)
+                                                                pattern_scheme=PROJECTS_PATTERN_MAP,
+                                                                threshold=threshold)
 
 
 if __name__ == "__main__":
