@@ -557,7 +557,7 @@ def plot_subject_chart(df, param,
     df_clean.loc[df_clean["macro_sector"] == "other", "subject"] = "other"
     # remove subject is subject count is lesser than min
     df_clean["subject"] = [label if subjects_dict.get(label, 0) > threshold else "other" for label in df_clean["subject"]]
-    title=f"Subjects distribution, {start_year}-{end_year}"
+    title=f"Subjects distribution, {start_year}-{end_year} (threshold: {threshold})"
     fig = px.sunburst(df_clean, 
                        path=["macro_sector", "subject"], 
                        values="count",
@@ -1354,6 +1354,6 @@ def create_plots():
 
 if __name__ == "__main__":
     create_plots()
-    save_all_figures(figures, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, use_cached=USE_CACHED_IMG)
+    #save_all_figures(figures, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, use_cached=USE_CACHED_IMG)
     save_md_report(figures, report_filename="report.md")
     save_html_dashboard(figures, dashboard_filename="dashboard.html")

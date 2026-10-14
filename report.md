@@ -55,17 +55,17 @@ Scarica il file CSV: [relatedid_2017-2025.csv](out/csv/relatedid_2017-2025.csv)
 
 Scarica il file CSV: [relatedid_2016-2019_2020-2022_2023-2025.csv](out/csv/relatedid_2016-2019_2020-2022_2023-2025.csv)
 
-## Subjects distribution, 2016-2019
+## Subjects distribution, 2016-2019 (threshold: 1)
 ![subject_2016-2019](out/svg/subject_2016-2019.svg)
 
 Scarica il file CSV: [subject_2016-2019.csv](out/csv/subject_2016-2019.csv)
 
-## Subjects distribution, 2020-2022
+## Subjects distribution, 2020-2022 (threshold: 5)
 ![subject_2020-2022](out/svg/subject_2020-2022.svg)
 
 Scarica il file CSV: [subject_2020-2022.csv](out/csv/subject_2020-2022.csv)
 
-## Subjects distribution, 2023-2025
+## Subjects distribution, 2023-2025 (threshold: 5)
 ![subject_2023-2025](out/svg/subject_2023-2025.svg)
 
 Scarica il file CSV: [subject_2023-2025.csv](out/csv/subject_2023-2025.csv)
