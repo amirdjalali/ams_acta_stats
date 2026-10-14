@@ -996,20 +996,23 @@ def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1, color
 def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=None, color_scheme=None, pattern_scheme=None):
     print(f"Plotting treemap for {param}, {min_year}-{max_year}...")
     df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
-    df_filtered[param] = df.apply(
+    df_filtered = df_filtered.copy()
+    df_filtered[param] = df_filtered.apply(
         lambda r: r[param] if r["count"] > threshold else "Other", axis=1
     )
     # merge all Other rows into one
-    df_grouped = df_filtered.groupby(param)["count"].sum().reset_index()
-    df_grouped["structure"] = df_grouped["structure"].fillna("None")
+    df_grouped = df_filtered.groupby(param, dropna=False)["count"].sum().reset_index()
+    df_grouped["structure"] = df_grouped["structure"].fillna("Other")
+    df_grouped = df_grouped[df_grouped[param] != ""]
     if df_map is not None:
         df_grouped = (df_grouped.merge(df_map, left_on="structure", right_on="subjectid", how="left")
                       .drop(columns=["subjectid", "structure"])
                       .rename(columns={"name": param}))
         df_grouped["structure"] = df_grouped["structure"].str.split(" - ").str[-1]
+    df_grouped[param] = df_grouped[param].fillna("None")
 
     title=f"Structures, {min_year}-{max_year} (threshold = {threshold})"
-    
+
     fig = px.treemap(
         df_grouped,
         path=[param],
@@ -1328,7 +1331,7 @@ def create_plots():
         
     for start_year in start_years:
         end_year = start_year + 2 if start_year > 2016 else start_year + 3
-        threshold = 1 if start_year == 2023 else 0
+        #threshold = 1 if start_year == 2023 else 0
         structures = get_subjects_or_structures(collection, type="structures")
         structures_plot, structures_filename = plot_structures(df=structures, 
                                             param="structure", 
