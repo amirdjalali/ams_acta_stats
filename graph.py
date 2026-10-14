@@ -1328,6 +1328,7 @@ def create_plots():
         
     for start_year in start_years:
         end_year = start_year + 2 if start_year > 2016 else start_year + 3
+        threshold = 1 if start_year == 2023 else 0
         structures = get_subjects_or_structures(collection, type="structures")
         structures_plot, structures_filename = plot_structures(df=structures, 
                                             param="structure", 
@@ -1354,6 +1355,6 @@ def create_plots():
 
 if __name__ == "__main__":
     create_plots()
-    #save_all_figures(figures, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, use_cached=USE_CACHED_IMG)
+    save_all_figures(figures, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, use_cached=USE_CACHED_IMG)
     save_md_report(figures, report_filename="report.md")
     save_html_dashboard(figures, dashboard_filename="dashboard.html")
