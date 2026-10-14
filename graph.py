@@ -342,6 +342,10 @@ def get_grouped_median_sizes(collection, bins=None):
         return df
 
 def get_funding_info(collection, param, start_year, end_year, get_all=False):
+    """
+    Get funding info for a specific parameter and year range.
+    If get_all is True, include all records regardless of the parameter value.
+    """
     if os.path.exists(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv"):
         print(f"Loading cached funding info data for {param}, {start_year}-{end_year}...")
         df = pd.read_csv(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv", encoding="utf-8")
@@ -364,7 +368,11 @@ def get_funding_info(collection, param, start_year, end_year, get_all=False):
                 {
                     "$addFields": {
                         param: {
-                            "$ifNull": [f"${param}", "None"]
+                            "$cond": {
+                                "if": { "$in": [f"${param}", [None, "", "None"]] },
+                                "then": "None",
+                                "else": f"${param}"
+                            }
                         }
                     }
                 },
@@ -394,44 +402,83 @@ def get_funding_info(collection, param, start_year, end_year, get_all=False):
             ]
         else:        
             pipeline = [
+                {
+                    "$match": {
+                        "type": { "$in": ["dataset", "software"] },
+                        "datestamp": { "$gt": start_date, "$lt": end_date },
+                        "$or": [
+                            { param: { "$exists": False } },
+                            { param: { "$in": [None, "None", ""] } }
+                        ]
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {
+                            "param": f"${param}",
+                            "fundingprogramme": { "$ifNull": ["$fundingprogramme", "None"] }
+                        },
+                        "count": { "$sum": 1 }
+                    }
+                },
+                {
+                    "$sort": { "count": -1 }
+                }
+            ]
+
+        results = list(collection.aggregate(pipeline))
+        df = pd.json_normalize(results).rename(columns={"_id.param": param, "_id.fundingprogramme": "fundingprogramme"})
+        df.to_csv(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv", index=False, encoding="utf-8")
+        return df
+
+def get_funding_relatedid(collection, start_year, end_year, param="projectacronym"):
+    if os.path.exists(f"{CACHE_DIR}/no_{param}_relatedid_{start_year}_{end_year}.csv"):
+        print(f"Loading data for datasets and softwares without {param} for {start_year}-{end_year}...")
+        df = pd.read_csv(f"{CACHE_DIR}/no_{param}_relatedid_{start_year}_{end_year}.csv", encoding="utf-8")
+        return df
+    else:
+        print(f"Querying data for datasets and softwares without {param} for {start_year}-{end_year}...")
+        start_date = f"{start_year}-01-01"
+        end_date = f"{end_year+1}-01-01"
+        pipeline = [
             {
                 "$match": {
-                    "datestamp": {
-                        "$gt": start_date,
-                        "$lt": end_date
-                    },
                     "type": { "$in": ["dataset", "software"] },
-                    param: { "$exists": True, "$ne": None }
-                }
-            },
-            {
-                "$project": { 
-                    param: 1,
-                    "fundingprogramme": 1,
-                    "_id": 0
+                    "datestamp": { "$gt": start_date, "$lt": end_date },
+                    "$and": [
+                        { "$or": [
+                            { param: { "$exists": False } },
+                            { param: { "$in": [None, "None", ""] } }
+                        ]},
+                        { "$or": [
+                            { "fundingprogramme": { "$exists": False } },
+                            { "fundingprogramme": { "$in": [None, "None", ""] } }
+                        ]}
+                    ]
                 }
             },
             {
                 "$group": {
                     "_id": {
-                        "param": f"${param}",
-                        "fundingprogramme": "$fundingprogramme",
+                        "year": { "$year": { "$toDate": "$datestamp" } },
+                        "relatedid": {
+                            "$cond": {
+                                "if": { "$gt": [{ "$size": { "$ifNull": ["$relatedid", []] } }, 0] },
+                                "then": True,
+                                "else": False
+                            }
+                        }
                     },
-                    "count": {
-                        "$sum": 1
-                    }
+                    "count": { "$sum": 1 }
                 }
             },
             {
-                "$sort": {
-                    "count": -1
-                }
+                "$sort": { "_id.year": 1 }
             }
         ]
-
         results = list(collection.aggregate(pipeline))
-        df = pd.json_normalize(results).rename(columns={"_id.param": param, "_id.fundingprogramme": "fundingprogramme"})
-        df.to_csv(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv", index=False, encoding="utf-8")
+        df = pd.json_normalize(results).rename(columns={"_id.relatedid": "has_relatedid", "_id.year": "year"})
+        df.to_csv(f"{CACHE_DIR}/no_{param}_relatedid_{start_year}_{end_year}.csv", index=False, encoding="utf-8")
         return df
 
 def get_creators(collection, start_year, end_year):
@@ -564,9 +611,9 @@ def plot_subject_chart(df, param,
                        color="macro_sector",
                        color_discrete_map=color_map
             )
-    fig = apply_global_patterns(fig, pattern_map)
+    fig = apply_global_patterns(fig, pattern_map) if pattern_map else fig
     #fig2.show()  # opens in browser
-    filename = f"{param}_{start_year}-{end_year}"
+    filename = f"{param}_{start_year}-{end_year}" + ("_no-pattern" if not pattern_map else "")
     df_clean.to_csv(f"{OUT_DIR}/{CSV_DIR}/{filename}.csv", index=False, encoding="utf-8")
     #save_figure(fig, filename)
     figures.append({
@@ -776,7 +823,7 @@ def plot_histogram(df, min_year=0,
             if pattern_map:
                 pattern_map[type_name] = pattern_map.get(type_filter[0])
     
-    title=f"Documents by year, {min_year}-{max_year}" + (f" — {type_name}" if type_name else "")
+    title=f"{filename} by year, {min_year}-{max_year}" + (f" — {type_name}" if type_name else "")
     
     fig = px.bar(
         df_filtered,
@@ -1302,7 +1349,7 @@ def create_plots():
             "no relatedid": ""
         }
     related_plot, related_filename = plot_histogram(related,
-                                                    min_year=2017,
+                                                    min_year=2016,
                                                     max_year=2025,
                                                     filename="relatedid",
                                                     color_map=RELATED_COLOR_MAP,
@@ -1327,7 +1374,7 @@ def create_plots():
                                                                 start_year=start_year,
                                                                 end_year=end_year,
                                                                 color_map=SUBJECTS_COLOR_MAP,
-                                                                pattern_map=SUBJECTS_PATTERN_MAP)
+                                                                pattern_map=None)
         
     for start_year in start_years:
         end_year = start_year + 2 if start_year > 2016 else start_year + 3
@@ -1354,6 +1401,19 @@ def create_plots():
                                                                 color_scheme=PROJECTS_COLOR_MAP,
                                                                 pattern_scheme=PROJECTS_PATTERN_MAP,
                                                                 threshold=threshold)
+
+    related_none = get_funding_relatedid(collection, start_year=2023, end_year=2025, param="projectacronym")
+    related_none = related_none.rename(columns={"has_relatedid": "type"})
+    related_none["type"] = related_none["type"].map({True: "has relatedid", False: "no relatedid"})
+    print(related_none)
+    related_none_plot, related_none_filename = plot_histogram(related_none,
+                                                              min_year=2023,
+                                                              max_year=2025,
+                                                              filename="no_fund_relatedid",
+                                                              color_map=RELATED_COLOR_MAP,
+                                                              pattern_map=RELATED_PATTERN_MAP,
+                                                              plot_order=["has relatedid", "no relatedid"],
+                                                              add_labels=True)
 
 
 if __name__ == "__main__":
