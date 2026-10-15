@@ -624,7 +624,7 @@ def plot_subject_chart(df, param,
     return fig, filename
 
 def plot_pie_chart(df, param, start_year=2016, end_year=2025, threshold=0, color_map=None, pattern_map=None):
-    df_filtered = df[df["year"].isin(range(start_year, end_year))]
+    df_filtered = df[df["year"].isin(range(start_year, end_year+1))]
     df_grouped = df_filtered.groupby(param)["count"].sum().reset_index()
     print(f"Plotting simple subject chart for {param}...")
     title=f"{param} distribution, {start_year}-{end_year}"
