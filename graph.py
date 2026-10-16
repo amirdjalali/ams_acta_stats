@@ -272,7 +272,7 @@ def get_filesizes_per_dataset(collection):
 def get_grouped_median_sizes(collection, bins=None):
     if bins is None:
         bins = [2016, 2020, 2023, 2026]
-    range_labels = [f"{bins[i]}-{bins[i+1]}" for i in range(len(bins)-1)]
+    range_labels = [f"{bins[i]}-{bins[i+1]-1}" for i in range(len(bins)-1)]
     years = "_".join(range_labels)
     if os.path.exists(f"{CACHE_DIR}/median_dataset_sizes_{years}.csv"):
         print(f"Loading cached grouped median dataset sizes data for {years}...")
