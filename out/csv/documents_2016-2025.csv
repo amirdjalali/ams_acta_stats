@@ -1,55 +1,55 @@
 count,year,type
-869,2016,monograph
-25,2016,book_section
-20,2016,article
-6,2016,conference_item
-5,2016,preprint/working paper
-3,2016,dataset/software
-92,2017,monograph
-65,2017,book_section
-20,2017,article
-8,2017,dataset/software
-4,2017,preprint/working paper
-2,2017,conference_item
-59,2018,monograph
-32,2018,article
-30,2018,book_section
-11,2018,preprint/working paper
-10,2018,dataset/software
-3,2018,conference_item
-62,2019,monograph
-27,2019,dataset/software
-12,2019,book_section
-12,2019,conference_item
-5,2019,preprint/working paper
-4,2019,article
-85,2020,monograph
-54,2020,dataset/software
-20,2020,book_section
-12,2020,preprint/working paper
-4,2020,article
-1,2020,conference_item
-77,2021,monograph
-46,2021,dataset/software
-23,2021,book_section
-14,2021,preprint/working paper
-98,2022,monograph
-57,2022,dataset/software
-10,2022,book_section
-10,2022,conference_item
-9,2022,preprint/working paper
-72,2023,monograph
-35,2023,dataset/software
-34,2023,book_section
-17,2023,conference_item
-7,2023,preprint/working paper
-115,2024,book_section
-106,2024,dataset/software
-90,2024,monograph
-9,2024,conference_item
-7,2024,preprint/working paper
-169,2025,dataset/software
-75,2025,monograph
-66,2025,book_section
-18,2025,preprint/working paper
-4,2025,conference_item
+869,2016,Monografia
+25,2016,Estratto da libro
+20,2016,Articolo
+6,2016,Documento relativo a convegno o altro evento
+5,2016,Preprint o Working Paper
+3,2016,Dataset e Software
+92,2017,Monografia
+65,2017,Estratto da libro
+20,2017,Articolo
+8,2017,Dataset e Software
+4,2017,Preprint o Working Paper
+2,2017,Documento relativo a convegno o altro evento
+59,2018,Monografia
+32,2018,Articolo
+30,2018,Estratto da libro
+11,2018,Preprint o Working Paper
+10,2018,Dataset e Software
+3,2018,Documento relativo a convegno o altro evento
+62,2019,Monografia
+27,2019,Dataset e Software
+12,2019,Estratto da libro
+12,2019,Documento relativo a convegno o altro evento
+5,2019,Preprint o Working Paper
+4,2019,Articolo
+85,2020,Monografia
+54,2020,Dataset e Software
+20,2020,Estratto da libro
+12,2020,Preprint o Working Paper
+4,2020,Articolo
+1,2020,Documento relativo a convegno o altro evento
+77,2021,Monografia
+46,2021,Dataset e Software
+23,2021,Estratto da libro
+14,2021,Preprint o Working Paper
+98,2022,Monografia
+57,2022,Dataset e Software
+10,2022,Estratto da libro
+10,2022,Documento relativo a convegno o altro evento
+9,2022,Preprint o Working Paper
+72,2023,Monografia
+35,2023,Dataset e Software
+34,2023,Estratto da libro
+17,2023,Documento relativo a convegno o altro evento
+7,2023,Preprint o Working Paper
+115,2024,Estratto da libro
+106,2024,Dataset e Software
+90,2024,Monografia
+9,2024,Documento relativo a convegno o altro evento
+7,2024,Preprint o Working Paper
+169,2025,Dataset e Software
+75,2025,Monografia
+66,2025,Estratto da libro
+18,2025,Preprint o Working Paper
+4,2025,Documento relativo a convegno o altro evento
