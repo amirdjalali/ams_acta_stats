@@ -1,18 +1,18 @@
 year_range,type,count
-2016-2019,article,76
-2016-2019,book_section,132
-2016-2019,conference_item,23
-2016-2019,dataset/software,48
-2016-2019,monograph,1082
-2016-2019,preprint/working paper,25
-2020-2022,article,4
-2020-2022,book_section,53
-2020-2022,conference_item,11
-2020-2022,dataset/software,157
-2020-2022,monograph,260
-2020-2022,preprint/working paper,35
-2023-2025,book_section,215
-2023-2025,conference_item,30
-2023-2025,dataset/software,310
-2023-2025,monograph,237
-2023-2025,preprint/working paper,32
+2016-2019,Articolo,76
+2016-2019,Estratto da libro,132
+2016-2019,Documento relativo a convegno o altro evento,23
+2016-2019,Dataset e Software,48
+2016-2019,Monografia,1082
+2016-2019,Preprint o Working Paper,25
+2020-2022,Articolo,4
+2020-2022,Estratto da libro,53
+2020-2022,Documento relativo a convegno o altro evento,11
+2020-2022,Dataset e Software,157
+2020-2022,Monografia,260
+2020-2022,Preprint o Working Paper,35
+2023-2025,Estratto da libro,215
+2023-2025,Documento relativo a convegno o altro evento,30
+2023-2025,Dataset e Software,310
+2023-2025,Monografia,237
+2023-2025,Preprint o Working Paper,32

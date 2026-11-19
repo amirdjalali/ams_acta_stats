@@ -1,7 +1,7 @@
 count,year,type
-2,2023,no relatedid
-6,2023,has relatedid
-17,2024,no relatedid
-14,2024,has relatedid
-37,2025,has relatedid
-28,2025,no relatedid
+2,2023,non ha un documento collegato
+6,2023,ha un documento collegato
+17,2024,non ha un documento collegato
+14,2024,ha un documento collegato
+37,2025,ha un documento collegato
+28,2025,non ha un documento collegato

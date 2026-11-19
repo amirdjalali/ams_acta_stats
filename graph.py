@@ -16,10 +16,21 @@ PNG_PATH = f"{OUT_DIR}/{PNG_DIR}"
 SVG_PATH = f"{OUT_DIR}/{SVG_DIR}"
 CSV_PATH = f"{OUT_DIR}/{CSV_DIR}"
 DEFAULT_SCALE = 2
+DEFAULT_WIDTH = 640
+DEFAULT_HEIGHT = 420
 CACHE_DIR = "queries"
 USE_CACHED_IMG = False
 SAVE_SVG = True
 SAVE_PNG = True
+TYPE_LABEL_MAP = {
+    "article": "Articolo",
+    "dataset/software": "Dataset e Software",
+    "monograph": "Monografia",
+    "conference_item": "Documento relativo a convegno o altro evento",
+    "book_section": "Estratto da libro",
+    "preprint/working paper": "Preprint o Working Paper"
+}
+
 
 figures = []
 
@@ -428,6 +439,9 @@ def get_funding_info(collection, param, start_year, end_year, get_all=False):
 
         results = list(collection.aggregate(pipeline))
         df = pd.json_normalize(results).rename(columns={"_id.param": param, "_id.fundingprogramme": "fundingprogramme"})
+        df[param] = df[param].fillna("Nessuno").replace("None", "Nessuno")
+        df["fundingprogramme"] = df["fundingprogramme"].fillna("Nessuno").replace("None", "Nessuno")
+
         df.to_csv(f"{CACHE_DIR}/{param}_funding_info_{start_year}_{end_year}.csv", index=False, encoding="utf-8")
         return df
 
@@ -568,19 +582,31 @@ def get_related_id(collection):
         df.to_csv(f"{CACHE_DIR}/related_ids.csv", index=False, encoding="utf-8")
         return df
 
-def save_figure(fig, filename, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, use_cached=USE_CACHED_IMG):
+def save_figure(fig, filename, 
+                scale=DEFAULT_SCALE, 
+                png=SAVE_PNG, 
+                svg=SAVE_SVG, 
+                use_cached=USE_CACHED_IMG,
+                width=None,
+                height=None):
     if use_cached:
         return True
     if png:
         print(f"Saving figure {filename} in PNG format...")
-        fig.write_image(f"{OUT_DIR}/{PNG_DIR}/{filename}.png", scale=scale)
+        fig.write_image(f"{OUT_DIR}/{PNG_DIR}/{filename}.png", scale=scale, width=width, height=height)
     if svg:
         print(f"Saving figure {filename} in SVG format...")
-        fig.write_image(f"{OUT_DIR}/{SVG_DIR}/{filename}.svg")
+        fig.write_image(f"{OUT_DIR}/{SVG_DIR}/{filename}.svg", width=width, height=height)
 
-def save_all_figures(figures_dict, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, use_cached=USE_CACHED_IMG):
+def save_all_figures(figures_dict, 
+                     scale=DEFAULT_SCALE, 
+                     png=SAVE_PNG, 
+                     svg=SAVE_SVG, 
+                     use_cached=USE_CACHED_IMG,
+                     width=None,
+                     height=None):
     for figure in figures_dict:
-        save_figure(figure["fig"], figure["filename"], scale=scale, png=png, svg=svg, use_cached=use_cached)
+        save_figure(figure["fig"], figure["filename"], scale=scale, png=png, svg=svg, use_cached=use_cached, width=width, height=height)
 
 def plot_subject_chart(df, param, 
                        threshold=0, 
@@ -599,11 +625,11 @@ def plot_subject_chart(df, param,
     subjects_dict = counts_subjects.to_dict()
     df_clean = df.copy()
     # remove macro_sector if count < min
-    df_clean["macro_sector"] = [label if macro_sectors_dict[label] > threshold else "other" for label in df["macro_sector"]]
+    df_clean["macro_sector"] = [label if macro_sectors_dict[label] > threshold else "Altro" for label in df["macro_sector"]]
     # remove also subject if macro sector is other
-    df_clean.loc[df_clean["macro_sector"] == "other", "subject"] = "other"
+    df_clean.loc[df_clean["macro_sector"] == "Altro", "subject"] = "Altro"
     # remove subject is subject count is lesser than min
-    df_clean["subject"] = [label if subjects_dict.get(label, 0) > threshold else "other" for label in df_clean["subject"]]
+    df_clean["subject"] = [label if subjects_dict.get(label, 0) > threshold else "Altro" for label in df_clean["subject"]]
     title=f"Subjects distribution, {start_year}-{end_year} (threshold: {threshold})"
     fig = px.sunburst(df_clean, 
                        path=["macro_sector", "subject"], 
@@ -623,11 +649,20 @@ def plot_subject_chart(df, param,
                 })
     return fig, filename
 
-def plot_pie_chart(df, param, start_year=2016, end_year=2025, threshold=0, color_map=None, pattern_map=None):
+def plot_pie_chart(df, param, 
+                   start_year=2016, 
+                   end_year=2025, 
+                   threshold=0, 
+                   color_map=None, 
+                   pattern_map=None,
+                   label_map=None):
     df_filtered = df[df["year"].isin(range(start_year, end_year+1))]
     df_grouped = df_filtered.groupby(param)["count"].sum().reset_index()
     print(f"Plotting simple subject chart for {param}...")
     title=f"{param} distribution, {start_year}-{end_year}"
+    if label_map:
+        df_grouped[param] = df_grouped[param].map(label_map).fillna(df_grouped[param])
+
     fig = px.pie(
         df_grouped,
         names=param,
@@ -800,7 +835,8 @@ def plot_histogram(df, min_year=0,
                    pattern_map=None,
                    plot_order=[None],
                    add_labels=False,
-                   add_percentage=False):
+                   add_percentage=False,
+                   label_map=None):
     
     print(f"Plotting {filename} histogram for {min_year}-{max_year}...")
     df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
@@ -824,6 +860,9 @@ def plot_histogram(df, min_year=0,
                 pattern_map[type_name] = pattern_map.get(type_filter[0])
     
     title=f"{filename} by year, {min_year}-{max_year}" + (f" — {type_name}" if type_name else "")
+
+    if label_map:
+        df_filtered["type"] = df_filtered["type"].map(label_map).fillna(df_filtered["type"])
     
     fig = px.bar(
         df_filtered,
@@ -834,7 +873,8 @@ def plot_histogram(df, min_year=0,
         color="type",
         pattern_shape="type",
         barmode="stack",
-        category_orders={"type": plot_order}
+        category_orders={"type": plot_order},
+
         )
 
     if add_percentage:
@@ -906,7 +946,8 @@ def plot_grouped_histogram(df,
                            color_map=None,
                            pattern_map=None,
                            add_labels=False,
-                           add_percentage=False):
+                           add_percentage=False,
+                           label_map=None):
     labels = [f"{s}-{e - 1}" for s, e in zip(bins[:-1], bins[1:])]
     label_string = ", ".join(labels)
     print(f"Plotting grouped histogram for {labels}...")
@@ -938,6 +979,9 @@ def plot_grouped_histogram(df,
                 color_map[type_name] = color_map.get(type_filter[0])
             if pattern_map:
                 pattern_map[type_name] = pattern_map.get(type_filter[0])
+
+    if label_map:
+        df_grouped["type"] = df_grouped["type"].map(label_map).fillna(df_grouped["type"])
 
     title=f"Documents by year, {label_string}" + (f" — {type_name}" if type_name else "")
     
@@ -985,6 +1029,7 @@ def plot_grouped_histogram(df,
             )
 
     fig.update_xaxes(title_text=None)
+    fig.update_yaxes(title_text=None)
 
     unique_categories = df_grouped["type"].nunique()
 
@@ -1014,11 +1059,11 @@ def plot_grouped_histogram(df,
 
 def plot_funding_treemap(df, param, min_year="", max_year="", threshold=1, color_scheme=None, pattern_scheme=None):
     print(f"Plotting funding treemap for {param}, {min_year}-{max_year}...")
-    df[param] = df[param].fillna("None")
+    df[param] = df[param].fillna("Nessuno")
     df[param] = df.apply(
-        lambda r: r[param] if r["count"] > threshold else "Other", axis=1
+        lambda r: r[param] if r["count"] > threshold else "Altro", axis=1
     )
-    df.loc[df["projectacronym"] == "Other", "fundingprogramme"] = None
+    df.loc[df["projectacronym"].isin(["Altro", "Nessuno"]), "fundingprogramme"] = None
     # merge all Other rows into one
     df_grouped = df.fillna("").groupby([param, "fundingprogramme"])["count"].sum().reset_index()
     title=f"Funding information ({param}), {min_year}-{max_year} (threshold = {threshold})"
@@ -1045,11 +1090,11 @@ def plot_structures(df, param, min_year="", max_year="", threshold=1, df_map=Non
     df_filtered = df[(df["year"] >= min_year) & (df["year"] <= max_year)]
     df_filtered = df_filtered.copy()
     df_filtered[param] = df_filtered.apply(
-        lambda r: r[param] if r["count"] > threshold else "Other", axis=1
+        lambda r: r[param] if r["count"] > threshold else "Altro", axis=1
     )
     # merge all Other rows into one
     df_grouped = df_filtered.groupby(param, dropna=False)["count"].sum().reset_index()
-    df_grouped["structure"] = df_grouped["structure"].fillna("Other")
+    df_grouped["structure"] = df_grouped["structure"].fillna("Altro")
     df_grouped = df_grouped[df_grouped[param] != ""]
     if df_map is not None:
         df_grouped = (df_grouped.merge(df_map, left_on="structure", right_on="subjectid", how="left")
@@ -1104,7 +1149,7 @@ def plot_creators(df, min_year="", max_year="", top_n=100):
                 })
     return fig, filename
 
-def map_subjects_or_structures(collection, type="subjects", df_map=None):
+def map_subjects_or_structures(collection, type="subjects", df_map=None, name_map=None):
     print(f"Creating color and shape maps for {type}...")
     if type == "types":
         df = get_types(collection)
@@ -1133,6 +1178,8 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
     # px.colors.qualitative.Pastel
     # px.colors.qualitative.Dark24   # 24 colors, good for many categories
     # px.colors.qualitative.Light24  # 24 light colors
+    if name_map:
+        categories = [name_map.get(cat, cat) for cat in categories]
     colors = cycle(px.colors.qualitative.Plotly)
     shapes = cycle(["/", "\\", ".", "x", "+", "-", "|", ""])
     color_map = {
@@ -1149,15 +1196,13 @@ def map_subjects_or_structures(collection, type="subjects", df_map=None):
         shape_map.update(ssd_shape_map)
 
     color_map.update({
-        "Other": "lightgrey",
-        "other": "grey",
-        "None": "grey"
+        "Altro": "lightgrey",
+        "Nessuno": "grey"
     })
 
     shape_map.update({
-        "Other": "/",
-        "other": "/",
-        "None": "/"
+        "Altro": "/",
+        "Nessuno": "/"
     })
 
     return color_map, shape_map
@@ -1297,32 +1342,37 @@ def create_plots():
 
     types = get_types(collection, collapse_types=True)
 
-    TYPES_COLOR_MAP, TYPES_PATTERN_MAP = map_subjects_or_structures(collection, type="types")
+    TYPES_COLOR_MAP, TYPES_PATTERN_MAP = map_subjects_or_structures(collection, type="types", name_map=TYPE_LABEL_MAP)
 
     types_torta_plot, types_torta_filename = plot_pie_chart(types,
                                                             param="type",
                                                             threshold=0,
                                                             color_map=TYPES_COLOR_MAP,
-                                                            pattern_map=TYPES_PATTERN_MAP)
+                                                            pattern_map=TYPES_PATTERN_MAP,
+                                                            label_map=TYPE_LABEL_MAP)
     
     types_plot, types_filename = plot_histogram(types, 2016, 2025, 
                                                 color_map=TYPES_COLOR_MAP, 
                                                 pattern_map=TYPES_PATTERN_MAP,
-                                                add_labels=True)
+                                                add_labels=True,
+                                                label_map=TYPE_LABEL_MAP)
     grouped_types_plot, grouped_types_filename = plot_grouped_histogram(df=types,
                                                                         color_map=TYPES_COLOR_MAP,
                                                                         pattern_map=TYPES_PATTERN_MAP,
-                                                                        add_labels=True)
+                                                                        add_labels=True,
+                                                                        label_map=TYPE_LABEL_MAP)
     datasets_plot, datasets_filename = plot_histogram(types, 2016, 2025, 
                                                       type_filter=["dataset/software"],
                                                       color_map=TYPES_COLOR_MAP,
                                                       pattern_map=TYPES_PATTERN_MAP,
-                                                      add_labels=True)
+                                                      add_labels=True,
+                                                      label_map=TYPE_LABEL_MAP)
     grouped_datasets_plot, grouped_datasets_filename = plot_grouped_histogram(df=types,
                                                                                 type_filter=["dataset/software"],
                                                                                 color_map=TYPES_COLOR_MAP,
                                                                                 pattern_map=TYPES_PATTERN_MAP,
-                                                                                add_labels=True)
+                                                                                add_labels=True,
+                                                                                label_map=TYPE_LABEL_MAP)
     sizes = get_filesize(collection)
     sizes_plot, sizes_filename = plot_size_histogram(sizes, min_year=2016, max_year=2025)
     grouped_sizes_plot, grouped_sizes_filename = plot_group_sizes(df=sizes)
@@ -1339,14 +1389,14 @@ def create_plots():
                                                                                     log_scale=False)
     related = get_related_id(collection)
     related = related.rename(columns={"has_relatedid": "type"})
-    related["type"] = related["type"].map({True: "has relatedid", False: "no relatedid"})
+    related["type"] = related["type"].map({True: "ha un documento collegato", False: "non ha un documento collegato"})
     RELATED_COLOR_MAP ={
-        "has relatedid": "#AB63FA",
-        "no relatedid": "#AB63FA"
+        "ha un documento collegato": "#AB63FA",
+        "non ha un documento collegato": "#AB63FA"
     }
     RELATED_PATTERN_MAP ={
-            "has relatedid": "/",
-            "no relatedid": ""
+            "ha un documento collegato": "/",
+            "non ha un documento collegato": ""
         }
     related_plot, related_filename = plot_histogram(related,
                                                     min_year=2016,
@@ -1354,7 +1404,7 @@ def create_plots():
                                                     filename="relatedid",
                                                     color_map=RELATED_COLOR_MAP,
                                                     pattern_map=RELATED_PATTERN_MAP,
-                                                    plot_order=["has relatedid", "no relatedid"],
+                                                    plot_order=["ha un documento collegato", "non ha un documento collegato"],
                                                     add_percentage=True)
     grouped_related_plot, grouped_related_filename = plot_grouped_histogram(df=related,
                                                                             filename="relatedid",
@@ -1404,7 +1454,7 @@ def create_plots():
 
     related_none = get_funding_relatedid(collection, start_year=2023, end_year=2025, param="projectacronym")
     related_none = related_none.rename(columns={"has_relatedid": "type"})
-    related_none["type"] = related_none["type"].map({True: "has relatedid", False: "no relatedid"})
+    related_none["type"] = related_none["type"].map({True: "ha un documento collegato", False: "non ha un documento collegato"})
     print(related_none)
     related_none_plot, related_none_filename = plot_histogram(related_none,
                                                               min_year=2023,
@@ -1412,12 +1462,12 @@ def create_plots():
                                                               filename="no_fund_relatedid",
                                                               color_map=RELATED_COLOR_MAP,
                                                               pattern_map=RELATED_PATTERN_MAP,
-                                                              plot_order=["has relatedid", "no relatedid"],
+                                                              plot_order=["ha un documento collegato", "non ha un documento collegato"],
                                                               add_labels=True)
 
 
 if __name__ == "__main__":
     create_plots()
-    save_all_figures(figures, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, use_cached=USE_CACHED_IMG)
+    save_all_figures(figures, scale=DEFAULT_SCALE, png=SAVE_PNG, svg=SAVE_SVG, use_cached=USE_CACHED_IMG, width=DEFAULT_WIDTH, height=DEFAULT_HEIGHT)
     save_md_report(figures, report_filename="report.md")
     save_html_dashboard(figures, dashboard_filename="dashboard.html")
