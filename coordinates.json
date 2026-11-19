@@ -1,0 +1,412 @@
+{
+    "01111rn36": {
+        "lat": 44.49381,
+        "lon": 11.33875,
+        "name": "University of Bologna"
+    },
+    "00pg6eq24": {
+        "lat": 48.58392,
+        "lon": 7.74553,
+        "name": "Universit\u00e9 de Strasbourg"
+    },
+    "000xsnr85": {
+        "lat": 43.32686,
+        "lon": -2.98884,
+        "name": "University of the Basque Country"
+    },
+    "0153tk833": {
+        "lat": 38.02931,
+        "lon": -78.47668,
+        "name": "University of Virginia"
+    },
+    "01fvbaw18": {
+        "lat": 41.65541,
+        "lon": -4.72353,
+        "name": "Universidad de Valladolid"
+    },
+    "0220mzb33": {
+        "lat": 51.50853,
+        "lon": -0.12574,
+        "name": "King's College London"
+    },
+    "0553yr311": {
+        "lat": 42.46667,
+        "lon": -2.45,
+        "name": "Universidad de La Rioja"
+    },
+    "05e0q7s59": {
+        "lat": 40.4165,
+        "lon": -3.70256,
+        "name": "Instituto de Qu\u00edmica Org\u00e1nica General"
+    },
+    "00afp2z80": {
+        "lat": 50.63373,
+        "lon": 5.56749,
+        "name": "University of Li\u00e8ge"
+    },
+    "0304hq317": {
+        "lat": 52.37052,
+        "lon": 9.73322,
+        "name": "Leibniz University Hannover"
+    },
+    "00bgk9508": {
+        "lat": 45.07049,
+        "lon": 7.68682,
+        "name": "Politecnico di Torino"
+    },
+    "02en5vm52": {
+        "lat": 48.85341,
+        "lon": 2.3488,
+        "name": "Sorbonne Universit\u00e9"
+    },
+    "005hdgp31": {
+        "lat": 43.32686,
+        "lon": -2.98884,
+        "name": "Basque Center for Materials, Applications and Nanostructures"
+    },
+    "00h2vm590": {
+        "lat": -33.92584,
+        "lon": 18.42322,
+        "name": "University of the Western Cape"
+    },
+    "03mb6wj31": {
+        "lat": 41.38879,
+        "lon": 2.15899,
+        "name": "Universitat Polit\u00e8cnica de Catalunya"
+    },
+    "05ht0mh31": {
+        "lat": 46.0693,
+        "lon": 13.23715,
+        "name": "University of Udine"
+    },
+    "0107c5v14": {
+        "lat": 44.40478,
+        "lon": 8.94439,
+        "name": "University of Genoa"
+    },
+    "02xj61x84": {
+        "lat": 35.82539,
+        "lon": 10.63699,
+        "name": "Centre de Recherche en Microelectronique et Nanotechnologie"
+    },
+    "0550dmh35": {
+        "lat": 43.29695,
+        "lon": 5.38107,
+        "name": "Centre Interdisciplinaire de Nanoscience de Marseille"
+    },
+    "026vcq606": {
+        "lat": 59.32938,
+        "lon": 18.06871,
+        "name": "KTH Royal Institute of Technology"
+    },
+    "02be6w209": {
+        "lat": 41.89193,
+        "lon": 12.51133,
+        "name": "Sapienza University of Rome"
+    },
+    "05patmk97": {
+        "lat": 38.19394,
+        "lon": 15.55256,
+        "name": "Institute for Chemical and Physical Processes"
+    },
+    "03p3aeb86": {
+        "lat": 37.98704,
+        "lon": -1.13004,
+        "name": "Universidad de Murcia"
+    },
+    "0174shg90": {
+        "lat": 38.87789,
+        "lon": -6.97061,
+        "name": "Universidad de Extremadura"
+    },
+    "00wjc7c48": {
+        "lat": 45.46427,
+        "lon": 9.18951,
+        "name": "University of Milan"
+    },
+    "03ad39j10": {
+        "lat": 43.70853,
+        "lon": 10.4036,
+        "name": "University of Pisa"
+    },
+    "02tzt0b78": {
+        "lat": 42.60003,
+        "lon": -5.57032,
+        "name": "Universidad de Le\u00f3n"
+    },
+    "02zyw2q61": {
+        "lat": -1.66506,
+        "lon": -78.65887,
+        "name": "Escuela Superior Polit\u00e9cnica de Chimborazo"
+    },
+    "013q1eq08": {
+        "lat": 31.22222,
+        "lon": 121.45806,
+        "name": "Fudan University"
+    },
+    "01cby8j38": {
+        "lat": 40.4165,
+        "lon": -3.70256,
+        "name": "Universidad Aut\u00f3noma de Madrid"
+    },
+    "00240q980": {
+        "lat": 45.40797,
+        "lon": 11.88586,
+        "name": "University of Padua"
+    },
+    "027ynra39": {
+        "lat": 41.12066,
+        "lon": 16.86982,
+        "name": "University of Bari Aldo Moro"
+    },
+    "042t93s57": {
+        "lat": 44.40478,
+        "lon": 8.94439,
+        "name": "Italian Institute of Technology"
+    },
+    "01nffqt88": {
+        "lat": 45.46427,
+        "lon": 9.18951,
+        "name": "Politecnico di Milano"
+    },
+    "013wkc921": {
+        "lat": 44.12775,
+        "lon": 12.0626,
+        "name": "Istituto Scientifico Romagnolo per lo Studio e la Cura dei Tumori"
+    },
+    "02s376052": {
+        "lat": 46.516,
+        "lon": 6.63282,
+        "name": "\u00c9cole Polytechnique F\u00e9d\u00e9rale de Lausanne"
+    },
+    "02vr0ne26": {
+        "lat": 45.46427,
+        "lon": 9.18951,
+        "name": "European Institute of Oncology"
+    },
+    "00cpb6264": {
+        "lat": 41.51142,
+        "lon": 14.06252,
+        "name": "Istituto Neurologico Mediterraneo"
+    },
+    "00t4vnv68": {
+        "lat": 44.49381,
+        "lon": 11.33875,
+        "name": "IRCCS Azienda Ospedliero-Universitaria di Bologna Policlinico di Sant'Orsola"
+    },
+    "035mh1293": {
+        "lat": 41.89193,
+        "lon": 12.51133,
+        "name": "Link Campus University"
+    },
+    "00a2syk23": {
+        "lat": 47.79941,
+        "lon": 13.04399,
+        "name": "Ludwig Boltzmann Institute for Digital Health and Prevention"
+    },
+    "01mbsxc64": {
+        "lat": 39.9075,
+        "lon": 116.39723,
+        "name": "IVL Swedish Environmental Research Institute"
+    },
+    "00a7vgh58": {
+        "lat": 51.43218,
+        "lon": 6.87967,
+        "name": "Max-Planck-Institut f\u00fcr Kohlenforschung"
+    },
+    "00x27da85": {
+        "lat": 43.1122,
+        "lon": 12.38878,
+        "name": "University of Perugia"
+    },
+    "00gpmb873": {
+        "lat": 47.42391,
+        "lon": 9.37477,
+        "name": "Kantonsspital St. Gallen"
+    },
+    "00htrxv69": {
+        "lat": 45.46427,
+        "lon": 9.18951,
+        "name": "Azienda Socio Sanitaria Territoriale Grande Ospedale Metropolitano Niguarda"
+    },
+    "014ja3n03": {
+        "lat": 52.48142,
+        "lon": -1.89983,
+        "name": "University Hospitals Birmingham NHS Foundation Trust"
+    },
+    "01b4q9c55": {
+        "lat": 47.49835,
+        "lon": 19.04045,
+        "name": "Orsz\u00e1gos Idegseb\u00e9szeti Tudom\u00e1nyos Int\u00e9zet"
+    },
+    "01zgy1s35": {
+        "lat": 53.55073,
+        "lon": 9.99302,
+        "name": "University Medical Center Hamburg-Eppendorf"
+    },
+    "02mgzgr95": {
+        "lat": 44.49381,
+        "lon": 11.33875,
+        "name": "Istituto delle Scienze Neurologiche di Bologna"
+    },
+    "02t1t6n83": {
+        "lat": 55.75222,
+        "lon": 37.61556,
+        "name": "Burdenko Neurosurgery Institute"
+    },
+    "03pt86f80": {
+        "lat": 47.26266,
+        "lon": 11.39454,
+        "name": "Innsbruck Medical University"
+    },
+    "04dt6a039": {
+        "lat": 44.80401,
+        "lon": 20.46513,
+        "name": "Military Medical Academy"
+    },
+    "04e61md13": {
+        "lat": 42.69751,
+        "lon": 23.32415,
+        "name": "Tokuda Hospital"
+    },
+    "04v54gj93": {
+        "lat": 52.2,
+        "lon": 0.11667,
+        "name": "Cambridge University Hospitals NHS Foundation Trust"
+    },
+    "05ctdxz19": {
+        "lat": 38.19394,
+        "lon": 15.55256,
+        "name": "University of Messina"
+    },
+    "05fz2yc38": {
+        "lat": 44.49381,
+        "lon": 11.33875,
+        "name": "Ospedale Bellaria"
+    },
+    "00s409261": {
+        "lat": 45.82058,
+        "lon": 8.82511,
+        "name": "University of Insubria"
+    },
+    "02jr6tp70": {
+        "lat": 40.85216,
+        "lon": 14.26811,
+        "name": "Federico II University Hospital"
+    },
+    "02q2d2610": {
+        "lat": 45.53558,
+        "lon": 10.21472,
+        "name": "University of Brescia"
+    },
+    "02zpc2253": {
+        "lat": 46.0693,
+        "lon": 13.23715,
+        "name": "Ospedale Santa Maria della Misericordia di Udine"
+    },
+    "048tbm396": {
+        "lat": 45.07049,
+        "lon": 7.68682,
+        "name": "University of Turin"
+    },
+    "04d7es448": {
+        "lat": 44.40478,
+        "lon": 8.94439,
+        "name": "Ospedale Policlinico San Martino"
+    },
+    "05d538656": {
+        "lat": 45.38193,
+        "lon": 9.1559,
+        "name": "IRCCS Humanitas Research Hospital"
+    },
+    "01j6drw72": {
+        "lat": 44.29007,
+        "lon": 11.87948,
+        "name": "Institute of Science, Technology and Sustainability for Ceramics"
+    },
+    "052g8jq94": {
+        "lat": 41.49109,
+        "lon": 2.14079,
+        "name": "Universitat Aut\u00f2noma de Barcelona"
+    },
+    "038483r84": {
+        "lat": 41.89193,
+        "lon": 12.51133,
+        "name": "Eni (Italy)"
+    },
+    "01b78mz79": {
+        "lat": -29.68417,
+        "lon": -53.80694,
+        "name": "Universidade Federal de Santa Maria"
+    },
+    "05wq02383": {
+        "lat": 43.83455,
+        "lon": 11.19522,
+        "name": "Istituto per la BioEconomia"
+    },
+    "038szmr31": {
+        "lat": 40.45535,
+        "lon": -3.46973,
+        "name": "Centro de Astrobiolog\u00eda"
+    },
+    "021z1mz76": {
+        "lat": 44.49381,
+        "lon": 11.33875,
+        "name": "Institute of Organic Synthesis and Photoreactivity"
+    },
+    "02k7v4d05": {
+        "lat": 46.94809,
+        "lon": 7.44744,
+        "name": "University of Bern"
+    },
+    "00n8ttd98": {
+        "lat": 44.49381,
+        "lon": 11.33875,
+        "name": "Institute of Atmospheric Sciences and Climate"
+    },
+    "01qckj285": {
+        "lat": 43.37135,
+        "lon": -8.396,
+        "name": "Universidade da Coru\u00f1a"
+    },
+    "02qcq7v36": {
+        "lat": 45.53558,
+        "lon": 10.21472,
+        "name": "Istituto Zooprofilattico Sperimentale della Lombardia e dell'Emilia Romagna \"Bruno Ubertini\""
+    },
+    "057qpr032": {
+        "lat": 44.84124,
+        "lon": -0.58046,
+        "name": "Universit\u00e9 de Bordeaux"
+    },
+    "02ycyys66": {
+        "lat": 44.49381,
+        "lon": 11.33875,
+        "name": "Istituto Ortopedico Rizzoli"
+    },
+    "02zsyt821": {
+        "lat": 29.96974,
+        "lon": 40.20641,
+        "name": "Jouf University"
+    },
+    "01yr73893": {
+        "lat": 42.05159,
+        "lon": 12.61969,
+        "name": "European Molecular Biology Laboratory"
+    },
+    "039bp8j42": {
+        "lat": 45.43854,
+        "lon": 10.9938,
+        "name": "University of Verona"
+    },
+    "04smdqx37": {
+        "lat": 44.49381,
+        "lon": 11.33875,
+        "name": "Fondazione IRET ONLUS"
+    },
+    "03nb1x490": {
+        "lat": 49.00937,
+        "lon": 8.40444,
+        "name": "Fraunhofer Institute for Chemical Technology"
+    }
+}
